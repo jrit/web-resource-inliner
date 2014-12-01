@@ -1,0 +1,6 @@
+.main{border: none;}
+body{background: url(http://www.example.com/img/bg.png);}
+body{background: url('http://www.example.com/img/bg.png');}
+body{background: url('../img/icon.png?__inline=true');}
+body{background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAHklEQVQoz2NgAIP/YMBAPBjVMNAa/pMISNcwEoMVAH0ls03D44ABAAAAAElFTkSuQmCC);}
+body{background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAHklEQVQoz2NgAIP/YMBAPBjVMNAa/pMISNcwEoMVAH0ls03D44ABAAAAAElFTkSuQmCC');}
