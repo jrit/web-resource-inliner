@@ -1,8 +1,9 @@
 /*
- * grunt-inline
- * https://github.com/chyingp/grunt-inline
+ * html-resource-inline
+ * https://github.com/jrit/html-resource-inline
  *
- * Copyright (c) 2014 Auguest G. casper & IMWEB TEAM
+ * Copyright (c) 2014 Jarrett Widman
+ * Based on https://github.com/chyingp/grunt-inline
  */
 
 'use strict';
@@ -24,7 +25,7 @@ var defaults = {
     uglify: false,
     cssmin: false,
     relativeTo: '',
-    inlineAttribute: '', //TODO: implement
+    inlineAttribute: 'data-inline',
     fileContent: ''
 };
 
@@ -43,7 +44,7 @@ var isBase64Path = function( url )
     return url.match( /^'?data.*base64/ );
 };
 
-var getAttrs = function( tagMarkup )
+var getAttrs = function( tagMarkup, settings )
 {
     var tag = tagMarkup.match( /^<[^\W>]*/ );
     if ( tag )
@@ -52,7 +53,8 @@ var getAttrs = function( tagMarkup )
         var attrs = tagMarkup
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
-            .replace( />?\s?<\/[^>]*>$/, "" );
+            .replace( />?\s?<\/[^>]*>$/, "" )
+            .replace( new RegExp( settings.inlineAttribute, "gi" ), "" );
 
         if ( tag === "<script" || tag === "<img" )
         {
@@ -96,8 +98,7 @@ var getRemote = function( uri, callback, toDataUri )
 
 inline.html = function( options )
 {
-    var settings = xtend(
-    {}, defaults, options );
+    var settings = xtend({}, defaults, options );
 
     var getInlineFilePath = function( src )
     {
@@ -137,80 +138,81 @@ inline.html = function( options )
     var replaceScript = function( callback )
     {
         var args = this;
-        if ( settings.scripts )
+
+        getTextReplacement( args.src, function( err, content )
         {
-            getTextReplacement( args.src, function( err, content )
-            {
-                var js = options.uglify ? UglifyJS.minify( content ).code : content;
-                var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
-                result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
-                callback( null );
-            } );
-        }
+            var js = options.uglify ? UglifyJS.minify( content ).code : content;
+            var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
+            result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
+            callback( null );
+        } );
     };
 
     var replaceLink = function( callback )
     {
         var args = this;
 
-        if ( settings.links )
+        getTextReplacement( args.src, function( err, content )
         {
-            getTextReplacement( args.src, function( err, content )
-            {
-                var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
-                result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
-                callback( null );
-            } );
-        }
+            var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
+            result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
+            callback( null );
+        } );
     };
 
     var replaceImg = function( callback )
     {
         var args = this;
 
-        if ( settings.images )
+        getFileReplacement( args.src, function( err, datauriContent )
         {
-            getFileReplacement( args.src, function( err, datauriContent )
-            {
-                var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
-                result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
-                callback( null );
-            } );
-        }
+            var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
+            result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
+            callback( null );
+        } );
     };
 
     var result = settings.fileContent;
     var tasks = [];
     var found;
 
-    var scriptRegex = /<script.+?src=["'](\/?[^"']+?)["'].*?>\s*<\/script>/g;
+    var scriptRegex = /<script.+?src=["']([^"']+?)["'].*?>\s*<\/script>/g;
     while ( ( found = scriptRegex.exec( result ) ) !== null )
     {
-        tasks.push( replaceScript.bind(
+        if ( settings.scripts || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
         {
-            src: found[ 1 ],
-            attrs: getAttrs( found[ 0 ] )
-        } ) );
+            tasks.push( replaceScript.bind(
+            {
+                src: found[ 1 ],
+                attrs: getAttrs( found[ 0 ], settings ),
+            } ) );
+        }
     }
 
-    var linkRegex = /<link.+?href=["'](\/?[^"']+?)["'].*?\/?>/g;
+    var linkRegex = /<link.+?href=["']([^"']+?)["'].*?\/?>/g;
     while ( ( found = linkRegex.exec( result ) ) !== null )
     {
-        tasks.push( replaceLink.bind(
+        if ( settings.links || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
         {
-            src: found[ 1 ],
-            attrs: getAttrs( found[ 0 ] )
-        } ) );
+            tasks.push( replaceLink.bind(
+            {
+                src: found[ 1 ],
+                attrs: getAttrs( found[ 0 ], settings )
+            } ) );
+        }
     }
 
-    var imgRegex = /<img.+?src=["'](\/?[^"']+?)["'].*?\/?\s*?>/g;
+    var imgRegex = /<img.+?src=["']([^"']+?)["'].*?\/?\s*?>/g;
     while ( ( found = imgRegex.exec( result ) ) !== null )
     {
-        tasks.push( replaceImg.bind(
+        if ( settings.images || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
         {
-            src: found[ 1 ],
-            attrs: getAttrs( found[ 0 ] )
-        } ) );
+            tasks.push( replaceImg.bind(
+            {
+                src: found[ 1 ],
+                attrs: getAttrs( found[ 0 ], settings )
+            } ) );
+        }
     }
 
 

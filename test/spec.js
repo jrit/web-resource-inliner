@@ -43,7 +43,7 @@ function testEquality(err, result, expected, done) {
 describe('html-resource-inline', function() {
 
     it('should inline local links', function(done) {
-        var expected = readFile('test/cases/css-out.html');
+        var expected = readFile('test/cases/css_out.html');
 
         inline.html({
             fileContent: readFile('test/cases/css.html'),
@@ -55,7 +55,7 @@ describe('html-resource-inline', function() {
     });
 
     it('should inline remote links', function(done) {
-        var expected = readFile('test/cases/css-remote-out.html');
+        var expected = readFile('test/cases/css-remote_out.html');
 
         inline.html({
             fileContent: readFile('test/cases/css-remote.html'),
@@ -67,7 +67,7 @@ describe('html-resource-inline', function() {
     });
 
     it('should inline scripts', function(done) {
-        var expected = readFile('test/cases/script-out.html');
+        var expected = readFile('test/cases/script_out.html');
 
         inline.html({
             fileContent: readFile('test/cases/script.html'),
@@ -79,7 +79,7 @@ describe('html-resource-inline', function() {
     });
 
     it('should inline local images', function(done) {
-        var expected = readFile('test/cases/img-out.html');
+        var expected = readFile('test/cases/img_out.html');
 
         inline.html({
             fileContent: readFile('test/cases/img.html'),
@@ -92,12 +92,25 @@ describe('html-resource-inline', function() {
     });
 
     it('should inline remote images', function(done) {
-        var expected = readFile('test/cases/img-remote-out.html');
+        var expected = readFile('test/cases/img-remote_out.html');
 
         inline.html({
             fileContent: readFile('test/cases/img-remote.html'),
             relativeTo: 'test/cases/',
             images: true,
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
+
+    it('should inline based on inlineAttribute', function(done) {
+        var expected = readFile('test/cases/img-opt-in_out.html');
+
+        inline.html({
+            fileContent: readFile('test/cases/img-opt-in.html'),
+            relativeTo: 'test/cases/',
+            //images: false, //default
             callback: function(err, result) {
                 testEquality(err, result, expected, done);
             }
