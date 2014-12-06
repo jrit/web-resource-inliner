@@ -120,7 +120,7 @@ describe('html', function() {
 
 describe('css', function() {
 
-    it('should inline local links', function(done) {
+    it('should inline local urls', function(done) {
         var expected = readFile('test/cases/css_out.css');
 
         inline.css({
@@ -132,7 +132,7 @@ describe('css', function() {
         });
     });
 
-    it('should inline remote links', function(done) {
+    it('should inline remote urls', function(done) {
         var expected = readFile('test/cases/css-remote_out.css');
 
         inline.css({
