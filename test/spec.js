@@ -131,4 +131,17 @@ describe('css', function() {
             }
         });
     });
+
+    it('should inline remote links', function(done) {
+        var expected = readFile('test/cases/css-remote_out.css');
+
+        inline.css({
+            fileContent: readFile('test/cases/css-remote.css'),
+            relativeTo: 'test/cases/',
+            images: true,
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
 });
