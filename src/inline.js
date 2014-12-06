@@ -95,51 +95,51 @@ var getRemote = function( uri, callback, toDataUri )
         } );
 };
 
+var getInlineFilePath = function( src, relativeTo )
+{
+    src = src.replace( /^\//, '' );
+    return ( path.resolve( relativeTo, src ).replace( /\?.*$/, '' ) );
+};
+
+var getInlineFileContents = function( src, relativeTo )
+{
+    return ( fs.readFileSync( getInlineFilePath( src, relativeTo ) ) );
+};
+
+var getTextReplacement = function( src, relativeTo, callback )
+{
+    if ( isRemotePath( src ) )
+    {
+        getRemote( src, callback );
+    }
+    else
+    {
+        callback( null, getInlineFileContents( src, relativeTo ) );
+    }
+};
+
+var getFileReplacement = function( src, relativeTo, callback )
+{
+    if ( isRemotePath( src ) )
+    {
+        getRemote( src, callback, true );
+    }
+    else
+    {
+        callback( null, ( new datauri( getInlineFilePath( src, relativeTo ) ) ).content );
+    }
+};
+
 
 inline.html = function( options )
 {
     var settings = xtend({}, defaults, options );
 
-    var getInlineFilePath = function( src )
-    {
-        src = src.replace( /^\//, '' );
-        return ( path.resolve( settings.relativeTo, src ).replace( /\?.*$/, '' ) );
-    };
-
-    var getInlineFileContents = function( src )
-    {
-        return ( fs.readFileSync( getInlineFilePath( src ) ) );
-    };
-
-    var getTextReplacement = function( src, callback )
-    {
-        if ( isRemotePath( src ) )
-        {
-            getRemote( src, callback );
-        }
-        else
-        {
-            callback( null, getInlineFileContents( src ) );
-        }
-    };
-
-    var getFileReplacement = function( src, callback )
-    {
-        if ( isRemotePath( src ) )
-        {
-            getRemote( src, callback, true );
-        }
-        else
-        {
-            callback( null, ( new datauri( getInlineFilePath( src ) ) ).content );
-        }
-    };
-
     var replaceScript = function( callback )
     {
         var args = this;
 
-        getTextReplacement( args.src, function( err, content )
+        getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
@@ -152,7 +152,7 @@ inline.html = function( options )
     {
         var args = this;
 
-        getTextReplacement( args.src, function( err, content )
+        getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
             var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
             result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
@@ -164,7 +164,7 @@ inline.html = function( options )
     {
         var args = this;
 
-        getFileReplacement( args.src, function( err, datauriContent )
+        getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
             result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
@@ -222,41 +222,50 @@ inline.html = function( options )
     } );
 }
 
-//TODO: neglected, need to rewrite
+
 inline.css = function( options )
 {
-    var settings = xtend(
-    {}, defaults, options );
+    var settings = xtend( {}, defaults, options );
 
-    if ( relativeTo )
+    var replaceUrl = function( callback )
     {
-        settings.filepath = settings.filepath.replace( /[^\/]+\//g, relativeTo );
+        var args = this;
+
+        if( isBase64Path( args.src ) )
+        {
+            // skip
+            callback( null );
+            return;
+        }
+
+        getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
+        {
+            var css = 'url("' + datauriContent + '");';
+            result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + args.src + ")[\"']?\\s?\\);", "g" ), css );
+            callback( null );
+        } );
+    };
+
+    var result = settings.fileContent;
+    var tasks = [];
+    var found = null;
+
+    var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
+    while ( ( found = urlRegex.exec( result ) ) !== null )
+    {
+        if ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s\\*\\/", "gi" ) ) )
+        {
+            tasks.push( replaceUrl.bind(
+            {
+                src: found[ 1 ],
+                attrs: getAttrs( found[ 0 ], settings )
+            } ) );
+        }
     }
 
-    fileContent = fileContent.replace( /url\(["']*([^)'"]+)["']*\)/g, function( matchedWord, imgUrl )
+    async.parallel( tasks, function()
     {
-        var newUrl = imgUrl;
-        var flag = imgUrl.indexOf( options.tag ) != -1; // urls like "img/bg.png?__inline" will be transformed to base64
-        if ( isBase64Path( imgUrl ) || isRemotePath( imgUrl ) )
-        {
-            return matchedWord;
-        }
-        var absoluteImgurl = path.resolve( path.dirname( filepath ), imgUrl );
-        newUrl = path.relative( path.dirname( filepath ), absoluteImgurl );
-
-        absoluteImgurl = absoluteImgurl.replace( /\?.*$/, '' );
-        if ( flag && grunt.file.exists( absoluteImgurl ) )
-        {
-            newUrl = datauri( absoluteImgurl );
-        }
-        else
-        {
-            newUrl = newUrl.replace( /\\/g, '/' );
-        }
-
-        return matchedWord.replace( imgUrl, newUrl );
+        result = settings.cssmin ? CleanCSS.process( result ) : result;
+        settings.callback( null, result );
     } );
-    fileContent = options.cssmin ? CleanCSS.process( fileContent ) : fileContent;
-
-    return fileContent;
 }

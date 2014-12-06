@@ -40,7 +40,7 @@ function testEquality(err, result, expected, done) {
     done();
 }
 
-describe('html-resource-inline', function() {
+describe('html', function() {
 
     it('should inline local links', function(done) {
         var expected = readFile('test/cases/css_out.html');
@@ -111,6 +111,21 @@ describe('html-resource-inline', function() {
             fileContent: readFile('test/cases/img-opt-in.html'),
             relativeTo: 'test/cases/',
             //images: false, //default
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
+});
+
+describe('css', function() {
+
+    it('should inline local links', function(done) {
+        var expected = readFile('test/cases/css_out.css');
+
+        inline.css({
+            fileContent: readFile('test/cases/css.css'),
+            relativeTo: 'test/cases/',
             callback: function(err, result) {
                 testEquality(err, result, expected, done);
             }
