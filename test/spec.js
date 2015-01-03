@@ -110,7 +110,46 @@ describe('html', function() {
         inline.html({
             fileContent: readFile('test/cases/img-opt-in.html'),
             relativeTo: 'test/cases/',
-            //images: false, //default
+            images: false,
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
+
+    it('should exclude based on inlineAttribute', function(done) {
+        var expected = readFile('test/cases/img-opt-out_out.html');
+
+        inline.html({
+            fileContent: readFile('test/cases/img-opt-out.html'),
+            relativeTo: 'test/cases/',
+            images: true,
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
+
+    it('should include images based on size', function(done) {
+        var expected = readFile('test/cases/img-opt-out_out.html');
+
+        inline.html({
+            fileContent: readFile('test/cases/img-opt-out.html'),
+            relativeTo: 'test/cases/',
+            images: 8,
+            callback: function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        });
+    });
+
+    it('should exclude images based on size', function(done) {
+        var expected = readFile('test/cases/img-too-large_out.html');
+
+        inline.html({
+            fileContent: readFile('test/cases/img-too-large.html'),
+            relativeTo: 'test/cases/',
+            images: 0.1,
             callback: function(err, result) {
                 testEquality(err, result, expected, done);
             }
@@ -126,6 +165,7 @@ describe('css', function() {
         inline.css({
             fileContent: readFile('test/cases/css.css'),
             relativeTo: 'test/cases/',
+            images: false,
             callback: function(err, result) {
                 testEquality(err, result, expected, done);
             }

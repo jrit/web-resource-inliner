@@ -19,7 +19,7 @@ var request = require( 'request' );
 var async = require( 'async' );
 
 var defaults = {
-    images: false,
+    images: 8,
     scripts: true,
     links: true,
     uglify: false,
@@ -54,6 +54,7 @@ var getAttrs = function( tagMarkup, settings )
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
             .replace( />?\s?<\/[^>]*>$/, "" )
+            .replace( new RegExp( settings.inlineAttribute + "-ignore", "gi" ), "" )
             .replace( new RegExp( settings.inlineAttribute, "gi" ), "" );
 
         if ( tag === "<script" || tag === "<img" )
@@ -142,6 +143,10 @@ inline.html = function( options )
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
+            if( typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
+            {
+                return ( callback( null ) );
+            }
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
             result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
             callback( null );
@@ -154,6 +159,10 @@ inline.html = function( options )
 
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
+            if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+            {
+                return ( callback( null ) );
+            }
             var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
             result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
             callback( null );
@@ -166,6 +175,10 @@ inline.html = function( options )
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
+            if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
+            {
+                return ( callback( null ) );
+            }
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
             result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
             callback( null );
@@ -179,12 +192,14 @@ inline.html = function( options )
     var scriptRegex = /<script.+?src=["']([^"']+?)["'].*?>\s*<\/script>/g;
     while ( ( found = scriptRegex.exec( result ) ) !== null )
     {
-        if ( settings.scripts || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
+        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+            && ( settings.scripts || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceScript.bind(
             {
                 src: found[ 1 ],
                 attrs: getAttrs( found[ 0 ], settings ),
+                limit: settings.scripts
             } ) );
         }
     }
@@ -192,12 +207,14 @@ inline.html = function( options )
     var linkRegex = /<link.+?href=["']([^"']+?)["'].*?\/?>/g;
     while ( ( found = linkRegex.exec( result ) ) !== null )
     {
-        if ( settings.links || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
+        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+            && ( settings.links || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceLink.bind(
             {
                 src: found[ 1 ],
-                attrs: getAttrs( found[ 0 ], settings )
+                attrs: getAttrs( found[ 0 ], settings ),
+                limit: settings.links
             } ) );
         }
     }
@@ -205,15 +222,21 @@ inline.html = function( options )
     var imgRegex = /<img.+?src=["']([^"']+?)["'].*?\/?\s*?>/g;
     while ( ( found = imgRegex.exec( result ) ) !== null )
     {
-        if ( settings.images || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) )
+        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+            && ( settings.images || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceImg.bind(
             {
                 src: found[ 1 ],
-                attrs: getAttrs( found[ 0 ], settings )
+                attrs: getAttrs( found[ 0 ], settings ),
+                limit: settings.images
             } ) );
         }
     }
+
+    result = result
+                .replace( new RegExp( " " + settings.inlineAttribute + "-ignore", "gi" ), "" )
+                .replace( new RegExp( " " + settings.inlineAttribute, "gi" ), "" );
 
 
     async.parallel( tasks, function()
@@ -240,6 +263,11 @@ inline.css = function( options )
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
+            if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
+            {
+                return ( callback( null ) );
+            }
+
             var css = 'url("' + datauriContent + '");';
             result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + args.src + ")[\"']?\\s?\\);", "g" ), css );
             callback( null );
@@ -251,14 +279,16 @@ inline.css = function( options )
     var found = null;
 
     var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
-    while ( ( found = urlRegex.exec( result ) ) !== null )
+    while( ( found = urlRegex.exec( result ) ) !== null )
     {
-        if ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s\\*\\/", "gi" ) ) )
+        if( !found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s\\*\\/", "gi" ) )
+            && ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s\\*\\/", "gi" ) ) ) )
         {
             tasks.push( replaceUrl.bind(
             {
                 src: found[ 1 ],
-                attrs: getAttrs( found[ 0 ], settings )
+                attrs: getAttrs( found[ 0 ], settings ),
+                limit: settings.images
             } ) );
         }
     }
