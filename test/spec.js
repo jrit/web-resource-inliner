@@ -164,6 +164,18 @@ describe('html', function() {
             }
         );
     });
+
+    it('should pass HTTP errors up through callbacks', function(done) {
+        inline.html({
+                fileContent: readFile('test/cases/404.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                assert.equal(!!err,true);
+                done();
+            }
+        );
+    });
 });
 
 describe('css', function() {

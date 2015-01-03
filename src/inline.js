@@ -79,7 +79,11 @@ var getRemote = function( uri, callback, toDataUri )
         {
             if ( err )
             {
-                throw err; //kill it
+                return( callback( err ) );
+            }
+            else if ( response.statusCode !== 200 )
+            {
+                return( callback( new Error( uri + " returned http " + response.code ) ) );
             }
 
             if ( toDataUri )
@@ -90,7 +94,6 @@ var getRemote = function( uri, callback, toDataUri )
             }
             else
             {
-
                 callback( null, body );
             }
         } );
@@ -142,6 +145,10 @@ inline.html = function( options, callback )
 
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
+            if ( err )
+            {
+                return ( callback( err ) );
+            }
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
             if( typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
             {
@@ -159,6 +166,10 @@ inline.html = function( options, callback )
 
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
+            if ( err )
+            {
+                return ( callback( err ) );
+            }
             if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
             {
                 return ( callback( null ) );
@@ -175,6 +186,10 @@ inline.html = function( options, callback )
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
+            if ( err )
+            {
+                return ( callback( err ) );
+            }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
                 return ( callback( null ) );
@@ -239,9 +254,9 @@ inline.html = function( options, callback )
                 .replace( new RegExp( " " + settings.inlineAttribute, "gi" ), "" );
 
 
-    async.parallel( tasks, function()
+    async.parallel( tasks, function( err )
     {
-        callback( null, result );
+        callback( err, result );
     } );
 }
 
@@ -263,6 +278,10 @@ inline.css = function( options, callback )
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
+            if ( err )
+            {
+                return ( callback( err ) );
+            }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
                 return ( callback( null ) );
@@ -293,9 +312,9 @@ inline.css = function( options, callback )
         }
     }
 
-    async.parallel( tasks, function()
+    async.parallel( tasks, function( err )
     {
         result = settings.cssmin ? CleanCSS.process( result ) : result;
-        callback( null, result );
+        callback( err, result );
     } );
 }
