@@ -46,114 +46,123 @@ describe('html', function() {
         var expected = readFile('test/cases/css_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/css.html'),
-            relativeTo: 'test/cases/',
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/css.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline remote links', function(done) {
         var expected = readFile('test/cases/css-remote_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/css-remote.html'),
-            relativeTo: 'test/cases/',
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/css-remote.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline scripts', function(done) {
         var expected = readFile('test/cases/script_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/script.html'),
-            relativeTo: 'test/cases/',
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/script.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline local images', function(done) {
         var expected = readFile('test/cases/img_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img.html'),
-            relativeTo: 'test/cases/',
-            images: true,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img.html'),
+                relativeTo: 'test/cases/',
+                images: true
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline remote images', function(done) {
         var expected = readFile('test/cases/img-remote_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img-remote.html'),
-            relativeTo: 'test/cases/',
-            images: true,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img-remote.html'),
+                relativeTo: 'test/cases/',
+                images: true
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline based on inlineAttribute', function(done) {
         var expected = readFile('test/cases/img-opt-in_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img-opt-in.html'),
-            relativeTo: 'test/cases/',
-            images: false,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img-opt-in.html'),
+                relativeTo: 'test/cases/',
+                images: false
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should exclude based on inlineAttribute', function(done) {
         var expected = readFile('test/cases/img-opt-out_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img-opt-out.html'),
-            relativeTo: 'test/cases/',
-            images: true,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img-opt-out.html'),
+                relativeTo: 'test/cases/',
+                images: true
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should include images based on size', function(done) {
         var expected = readFile('test/cases/img-opt-out_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img-opt-out.html'),
-            relativeTo: 'test/cases/',
-            images: 8,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img-opt-out.html'),
+                relativeTo: 'test/cases/',
+                images: 8
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should exclude images based on size', function(done) {
         var expected = readFile('test/cases/img-too-large_out.html');
 
         inline.html({
-            fileContent: readFile('test/cases/img-too-large.html'),
-            relativeTo: 'test/cases/',
-            images: 0.1,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/img-too-large.html'),
+                relativeTo: 'test/cases/',
+                images: 0.1
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 });
 
@@ -163,25 +172,27 @@ describe('css', function() {
         var expected = readFile('test/cases/css_out.css');
 
         inline.css({
-            fileContent: readFile('test/cases/css.css'),
-            relativeTo: 'test/cases/',
-            images: false,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/css.css'),
+                relativeTo: 'test/cases/',
+                images: false
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 
     it('should inline remote urls', function(done) {
         var expected = readFile('test/cases/css-remote_out.css');
 
         inline.css({
-            fileContent: readFile('test/cases/css-remote.css'),
-            relativeTo: 'test/cases/',
-            images: true,
-            callback: function(err, result) {
+                fileContent: readFile('test/cases/css-remote.css'),
+                relativeTo: 'test/cases/',
+                images: true
+            },
+            function(err, result) {
                 testEquality(err, result, expected, done);
             }
-        });
+        );
     });
 });

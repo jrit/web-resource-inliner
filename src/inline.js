@@ -2,7 +2,7 @@
  * html-resource-inline
  * https://github.com/jrit/html-resource-inline
  *
- * Copyright (c) 2014 Jarrett Widman
+ * Copyright (c) 2015 Jarrett Widman
  * Based on https://github.com/chyingp/grunt-inline
  */
 
@@ -132,7 +132,7 @@ var getFileReplacement = function( src, relativeTo, callback )
 };
 
 
-inline.html = function( options )
+inline.html = function( options, callback )
 {
     var settings = xtend({}, defaults, options );
 
@@ -241,12 +241,12 @@ inline.html = function( options )
 
     async.parallel( tasks, function()
     {
-        settings.callback( null, result );
+        callback( null, result );
     } );
 }
 
 
-inline.css = function( options )
+inline.css = function( options, callback )
 {
     var settings = xtend( {}, defaults, options );
 
@@ -296,6 +296,6 @@ inline.css = function( options )
     async.parallel( tasks, function()
     {
         result = settings.cssmin ? CleanCSS.process( result ) : result;
-        settings.callback( null, result );
+        callback( null, result );
     } );
 }
