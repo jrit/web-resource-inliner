@@ -1,14 +1,13 @@
 {
   "author": {
-    "name": "程序猿小卡",
-    "email": "chyingp@gmail.com",
-    "url": "https://github.com/chyingp"
+    "name": "Jarrett Widman",
+    "email": "jarrett.widman@vokal.io",
+    "url": "https://github.com/jrit"
   },
-  "name": "grunt-inline",
+  "name": "html-resource-inline",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "0.3.4",
+  "version": "1.0.0",
   "keywords": [
-    "gruntplugin",
     "inline",
     "js",
     "css"
@@ -16,14 +15,15 @@
   "main": "inline",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chyingp/grunt-inline.git"
+    "url": "https://github.com/jrit/html-resource-inline.git"
   },
   "engines": {
-    "node": ">=0.8.0"
+    "node": ">=0.10.0"
   },
   "devDependencies": {
     "grunt": "~0.4.0",
-    "mocha": "^2.0.1"
+    "mocha": "^2.0.1",
+    "istanbul": "^0.3.5"
   },
   "dependencies": {
     "uglify-js": "2.4.1",
@@ -34,7 +34,8 @@
     "async": "^0.9.0"
   },
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --ui bdd -R spec"
   },
   "_id": "grunt-inline@0.1.0",
   "_from": "grunt-inline@~0.1.0"
