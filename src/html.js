@@ -51,7 +51,7 @@ module.exports = function( options, callback )
 
             var cssOptions = xtend( {}, settings, {
                 fileContent: content.toString(),
-                relativeTo: path.resolve( inline.getInlineFilePath( args.src, settings.relativeTo ), ".." + path.sep )
+                rebaseRelativeTo: path.relative( settings.relativeTo, path.join( settings.relativeTo, args.src, ".." + path.sep ) )
             } );
 
             css( cssOptions, function ( err, content )

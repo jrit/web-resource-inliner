@@ -17,6 +17,7 @@ util.defaults = {
     uglify: false,
     cssmin: false,
     relativeTo: '',
+    rebaseRelativeTo: '',
     inlineAttribute: 'data-inline',
     fileContent: ''
 };

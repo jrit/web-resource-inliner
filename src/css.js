@@ -5,6 +5,7 @@ var datauri = require( "datauri" );
 var CleanCSS = require( "clean-css" );
 var xtend = require( "xtend" );
 var async = require( "async" );
+var path = require( "path" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
@@ -37,11 +38,29 @@ module.exports = function( options, callback )
         } );
     };
 
+    var rebase = function( src )
+    {
+        var css = 'url("' + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + '");';
+        result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + src + ")[\"']?\\s?\\);", "g" ), css );
+    };
+
     var result = settings.fileContent;
     var tasks = [];
     var found = null;
 
     var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
+
+    if( settings.rebaseRelativeTo )
+    {
+        while( ( found = urlRegex.exec( result ) ) !== null )
+        {
+            var src = found[ 1 ];
+            if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
+            {
+               rebase( src );
+            }
+        }
+    }
     while( ( found = urlRegex.exec( result ) ) !== null )
     {
         if( !found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "gi" ) )
@@ -50,7 +69,6 @@ module.exports = function( options, callback )
             tasks.push( replaceUrl.bind(
             {
                 src: found[ 1 ],
-                attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.images
             } ) );
         }
