@@ -25,7 +25,7 @@ function diff(actual, expected) {
         }
         var other = actual[i];
         if (line === other) {
-            console.error('%d| %j%s | %j', i + 1, line, '', other);
+            console.error('%d| %j', i + 1, line);
         } else {
             console.error('\033[31m%d| %j%s | %j\033[0m', i + 1, line, '', other);
         }
@@ -179,7 +179,6 @@ describe('html', function() {
 });
 
 describe('css', function() {
-
     it('should inline local urls', function(done) {
         var expected = readFile('test/cases/css_out.css');
 

@@ -90,11 +90,11 @@ var getRemote = function( uri, callback, toDataUri )
             {
                 var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
                 var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
-                callback( null, datauriContent );
+                return( callback( null, datauriContent ) );
             }
             else
             {
-                callback( null, body );
+                return( callback( null, body ) );
             }
         } );
 };
@@ -124,13 +124,14 @@ var getTextReplacement = function( src, relativeTo, callback )
 
 var getFileReplacement = function( src, relativeTo, callback )
 {
-    if ( isRemotePath( src ) )
+    if( isRemotePath( src ) )
     {
         getRemote( src, callback, true );
     }
     else
     {
-        callback( null, ( new datauri( getInlineFilePath( src, relativeTo ) ) ).content );
+        var result = ( new datauri( getInlineFilePath( src, relativeTo ) ) ).content;
+        callback( result === undefined ? new Error( "Local file not found" ) : null, result );
     }
 };
 
@@ -145,18 +146,18 @@ inline.html = function( options, callback )
 
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
-            if ( err )
+            if( err )
             {
-                return ( callback( err ) );
+                return( callback( err ) );
             }
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
             if( typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
             {
-                return ( callback( null ) );
+                return( callback( null ) );
             }
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
             result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
-            callback( null );
+            return( callback( null ) );
         } );
     };
 
@@ -166,17 +167,30 @@ inline.html = function( options, callback )
 
         getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
-            if ( err )
+            if( err )
             {
-                return ( callback( err ) );
+                return( callback( err ) );
             }
             if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
             {
-                return ( callback( null ) );
+                return( callback( null ) );
             }
-            var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
-            result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
-            callback( null );
+
+            var cssOptions = xtend( {}, settings, {
+                fileContent: content.toString(),
+                relativeTo: path.resolve( getInlineFilePath( args.src, settings.relativeTo ), ".." + path.sep )
+            } );
+
+            inline.css( cssOptions, function ( err, content )
+            {
+                if( err )
+                {
+                    return( callback( err ) );
+                }
+                var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
+                result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
+                return( callback( null ) );
+            } );
         } );
     };
 
@@ -186,7 +200,7 @@ inline.html = function( options, callback )
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
-            if ( err )
+            if( err )
             {
                 return ( callback( err ) );
             }
@@ -196,7 +210,7 @@ inline.html = function( options, callback )
             }
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
             result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
-            callback( null );
+            return( callback( null ) );
         } );
     };
 
@@ -205,9 +219,9 @@ inline.html = function( options, callback )
     var found;
 
     var scriptRegex = /<script.+?src=["']([^"']+?)["'].*?>\s*<\/script>/g;
-    while ( ( found = scriptRegex.exec( result ) ) !== null )
+    while( ( found = scriptRegex.exec( result ) ) !== null )
     {
-        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
             && ( settings.scripts || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceScript.bind(
@@ -220,9 +234,9 @@ inline.html = function( options, callback )
     }
 
     var linkRegex = /<link.+?href=["']([^"']+?)["'].*?\/?>/g;
-    while ( ( found = linkRegex.exec( result ) ) !== null )
+    while( ( found = linkRegex.exec( result ) ) !== null )
     {
-        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
             && ( settings.links || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceLink.bind(
@@ -235,9 +249,9 @@ inline.html = function( options, callback )
     }
 
     var imgRegex = /<img.+?src=["']([^"']+?)["'].*?\/?\s*?>/g;
-    while ( ( found = imgRegex.exec( result ) ) !== null )
+    while( ( found = imgRegex.exec( result ) ) !== null )
     {
-        if ( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
+        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
             && ( settings.images || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
         {
             tasks.push( replaceImg.bind(
@@ -271,25 +285,23 @@ inline.css = function( options, callback )
 
         if( isBase64Path( args.src ) )
         {
-            // skip
-            callback( null );
-            return;
+            return callback( null ); // skip
         }
 
         getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
-            if ( err )
+            if( err )
             {
-                return ( callback( err ) );
+                return( callback( err ) );
             }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
-                return ( callback( null ) );
+                return( callback( null ) ); // skip
             }
 
             var css = 'url("' + datauriContent + '");';
             result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + args.src + ")[\"']?\\s?\\);", "g" ), css );
-            callback( null );
+            return( callback( null ) );
         } );
     };
 
@@ -300,8 +312,8 @@ inline.css = function( options, callback )
     var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
     while( ( found = urlRegex.exec( result ) ) !== null )
     {
-        if( !found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s\\*\\/", "gi" ) )
-            && ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s\\*\\/", "gi" ) ) ) )
+        if( !found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "gi" ) )
+            && ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s?\\*\\/", "gi" ) ) ) )
         {
             tasks.push( replaceUrl.bind(
             {
@@ -314,7 +326,10 @@ inline.css = function( options, callback )
 
     async.parallel( tasks, function( err )
     {
-        result = settings.cssmin ? CleanCSS.process( result ) : result;
+        if( !err )
+        {
+            result = settings.cssmin ? CleanCSS.process( result ) : result;
+        }
         callback( err, result );
     } );
 }
