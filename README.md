@@ -26,11 +26,6 @@ behavior can be overrided via several options.
 ```
 npm install https://github.com/jrit/html-resource-inline.git
 ```
-and after that is complete
-```
-npm install
-```
-to install dependencies
 
 
 ## Usage Examples
@@ -65,6 +60,9 @@ When true, inline stylesheet links unless they have an exclusion attribute (see 
 
 #### `relativeTo`, string, default empty string
 Describes the path relationship between where html-resource-inline is running and what the relative paths in `fileContent` refer to. For example, the tests cases in this package are in `test/cases/` so their relative paths start by referring to that folder, but the root of this project and where `npm test` runs from is 2 folders up, so `relativeTo` is set to `test/cases/` in `test/spec.js`.
+
+#### `rebaseRelativeTo`, string, default empty string
+Describes the path relationship between CSS content and the context it will be loaded in. For example, when a CSS file contains `url(some-file.png)` and the file is moved from a location in a folder like `/css` to `/` then the path to the image needs to be changed to `url(css/some-file.png)`. In this case, `rebaseRelativeTo` would be `css`. You probably don't want to set this when you are using `html()`.
 
 #### `cssmin`, Boolean, default `false`
 If cssmin is assigned `true`, CSS will be minified before inlined.
