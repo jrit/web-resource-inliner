@@ -12,7 +12,7 @@
     "js",
     "css"
   ],
-  "main": "inline",
+  "main": "src/inline.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jrit/html-resource-inline.git"
