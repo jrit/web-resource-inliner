@@ -1,4 +1,4 @@
-# html-resource-inline[![build status](https://secure.travis-ci.org/jrit/html-resource-inline.png)](http://travis-ci.org/jrit/html-resource-inline)
+# web-resource-inliner[![build status](https://secure.travis-ci.org/jrit/web-resource-inliner.png)](http://travis-ci.org/jrit/web-resource-inliner)
 
 Brings externally referenced resources, such as js, css and images, into
 a single file.
@@ -24,7 +24,7 @@ behavior can be overrided via several options.
 
 ## Getting Started
 ```
-npm install https://github.com/jrit/html-resource-inline.git
+npm install https://github.com/jrit/web-resource-inliner.git
 ```
 
 
@@ -59,7 +59,7 @@ When true, inline scripts unless they have an exclusion attribute (see inlineAtt
 When true, inline stylesheet links unless they have an exclusion attribute (see inlineAttribute option). When false, exclude stylesheet links unless they have an inclusion attribute (see inlineAttribute option). When a number, inline stylesheet links only when the base64 content size is less than the number of KBs.
 
 #### `relativeTo`, string, default empty string
-Describes the path relationship between where html-resource-inline is running and what the relative paths in `fileContent` refer to. For example, the tests cases in this package are in `test/cases/` so their relative paths start by referring to that folder, but the root of this project and where `npm test` runs from is 2 folders up, so `relativeTo` is set to `test/cases/` in `test/spec.js`.
+Describes the path relationship between where web-resource-inliner is running and what the relative paths in `fileContent` refer to. For example, the tests cases in this package are in `test/cases/` so their relative paths start by referring to that folder, but the root of this project and where `npm test` runs from is 2 folders up, so `relativeTo` is set to `test/cases/` in `test/spec.js`.
 
 #### `rebaseRelativeTo`, string, default empty string
 Describes the path relationship between CSS content and the context it will be loaded in. For example, when a CSS file contains `url(some-file.png)` and the file is moved from a location in a folder like `/css` to `/` then the path to the image needs to be changed to `url(css/some-file.png)`. In this case, `rebaseRelativeTo` would be `css`. You probably don't want to set this when you are using `html()`.

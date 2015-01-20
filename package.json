@@ -4,18 +4,22 @@
     "email": "jarrett.widman@vokal.io",
     "url": "https://github.com/jrit"
   },
-  "name": "html-resource-inline",
+  "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
   "version": "1.0.0",
   "keywords": [
     "inline",
     "js",
-    "css"
+    "css",
+    "scripts",
+    "stylesheets",
+    "html",
+    "datauri"
   ],
   "main": "src/inline.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jrit/html-resource-inline.git"
+    "url": "https://github.com/jrit/web-resource-inliner.git"
   },
   "engines": {
     "node": ">=0.10.0"
