@@ -24,7 +24,7 @@ behavior can be overrided via several options.
 
 ## Getting Started
 ```
-npm install https://github.com/jrit/web-resource-inliner.git
+npm install web-resource-inliner
 ```
 
 
