@@ -5,11 +5,11 @@ a single file.
 
 For example:
 
-````
+```html
 <link href="css/style.css" rel="stylesheet" data-inline >
-````
+```
 is replaced with
-````
+```html
 <style>
 /* contents of css/style.css */
 </style>
