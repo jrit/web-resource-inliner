@@ -1,7 +1,6 @@
 # web-resource-inliner[![build status](https://secure.travis-ci.org/jrit/web-resource-inliner.png)](http://travis-ci.org/jrit/web-resource-inliner)
 
-Brings externally referenced resources, such as js, css and images, into
-a single file.
+Brings externally referenced resources, such as js, css and images, into a single file.
 
 For example:
 
@@ -15,11 +14,9 @@ is replaced with
 </style>
 ```
 
-Javascript references are brought inline, and images in the html
-and css blocks are converted to base-64 data: urls.
+Javascript references are brought inline, and images in the html and css blocks are converted to base-64 data: urls.
 
-By default, all links and scripts are inlined, plus any images under 8KB, however this
-behavior can be overrided via several options.
+By default, all links and scripts are inlined, plus any images under 8KB, however this behavior can be overrided via several options.
 
 
 ## Getting Started
@@ -59,7 +56,7 @@ When true, inline scripts unless they have an exclusion attribute (see inlineAtt
 When true, inline stylesheet links unless they have an exclusion attribute (see inlineAttribute option). When false, exclude stylesheet links unless they have an inclusion attribute (see inlineAttribute option). When a number, inline stylesheet links only when the base64 content size is less than the number of KBs.
 
 #### `relativeTo`, string, default empty string
-Describes the path relationship between where web-resource-inliner is running and what the relative paths in `fileContent` refer to. For example, the tests cases in this package are in `test/cases/` so their relative paths start by referring to that folder, but the root of this project and where `npm test` runs from is 2 folders up, so `relativeTo` is set to `test/cases/` in `test/spec.js`.
+Describes the path relationship between where web-resource-inliner is running and what the relative paths in `fileContent` or href/src urls refer to. For example, the tests cases in this package are in `test/cases/` so their relative paths start by referring to that folder, but the root of this project and where `npm test` runs from is 2 folders up, so `relativeTo` is set to `test/cases/` in `test/spec.js`. Likewise, with `href="content.css"` and a `relativeTo` of `http://github.com/` the resource retrieved would be `http://github.com/content.css`.
 
 #### `rebaseRelativeTo`, string, default empty string
 Describes the path relationship between CSS content and the context it will be loaded in. For example, when a CSS file contains `url(some-file.png)` and the file is moved from a location in a folder like `/css` to `/` then the path to the image needs to be changed to `url(css/some-file.png)`. In this case, `rebaseRelativeTo` would be `css`. You probably don't want to set this when you are using `html()`.
@@ -76,4 +73,5 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 
 ## Release History
+* 2015-02-18 v1.0.1 use relativeTo with URLs to resolve web paths; use https: as default when paths start with //
 * 2015-01-01 v1.0.0 initial release: Forked and rewritten from grunt-inline with the goal of providing additional use cases and a new API
