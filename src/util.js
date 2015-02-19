@@ -2,6 +2,7 @@
 
 
 var path = require( "path" );
+var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
@@ -47,17 +48,22 @@ util.getAttrs = function( tagMarkup, settings )
 
         if ( tag === "<script" || tag === "<img" )
         {
-            return ( attrs.replace( /(src|language|type)=["'][^"']*["']/gi, "" ).trim() );
+            return attrs.replace( /(src|language|type)=["'][^"']*["']/gi, "" ).trim();
         }
         else if ( tag === "<link" )
         {
-            return ( attrs.replace( /(href|rel)=["'][^"']*["']/g, "" ).trim() );
+            return attrs.replace( /(href|rel)=["'][^"']*["']/g, "" ).trim();
         }
     }
 };
 
 util.getRemote = function( uri, callback, toDataUri )
 {
+    if( uri.match(/^\/\//) )
+    {
+        uri = "https:" + uri;
+    }
+
     request(
         {
             uri: uri,
@@ -65,16 +71,16 @@ util.getRemote = function( uri, callback, toDataUri )
         },
         function( err, response, body )
         {
-            if ( err )
+            if( err )
             {
-                return( callback( err ) );
+                return callback( err );
             }
             else if ( response.statusCode !== 200 )
             {
-                return( callback( new Error( uri + " returned http " + response.code ) ) );
+                return callback( new Error( uri + " returned http " + response.code ) );
             }
 
-            if ( toDataUri )
+            if( toDataUri )
             {
                 var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
                 var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
@@ -82,7 +88,7 @@ util.getRemote = function( uri, callback, toDataUri )
             }
             else
             {
-                return( callback( null, body ) );
+                return callback( null, body );
             }
         } );
 };
@@ -90,17 +96,21 @@ util.getRemote = function( uri, callback, toDataUri )
 util.getInlineFilePath = function( src, relativeTo )
 {
     src = src.replace( /^\//, '' );
-    return ( path.resolve( relativeTo, src ).replace( /\?.*$/, '' ) );
+    return path.resolve( relativeTo, src ).replace( /\?.*$/, '' );
 };
 
 util.getInlineFileContents = function( src, relativeTo )
 {
-    return ( fs.readFileSync( util.getInlineFilePath( src, relativeTo ) ) );
+    return fs.readFileSync( util.getInlineFilePath( src, relativeTo ) );
 };
 
 util.getTextReplacement = function( src, relativeTo, callback )
 {
-    if ( util.isRemotePath( src ) )
+    if( util.isRemotePath( relativeTo ) )
+    {
+        util.getRemote( url.resolve( relativeTo, src ), callback );
+    }
+    else if( util.isRemotePath( src ) )
     {
         util.getRemote( src, callback );
     }

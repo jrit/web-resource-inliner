@@ -68,6 +68,32 @@ describe('html', function() {
         );
     });
 
+    it('should inline remote links with no protocol', function(done) {
+        var expected = readFile('test/cases/css-remote-no-protocol_out.html');
+
+        inline.html({
+                fileContent: readFile('test/cases/css-remote-no-protocol.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        );
+    });
+
+    it('should inline remote links relative to a url', function(done) {
+        var expected = readFile('test/cases/css-remote-relative-to-url_out.html');
+
+        inline.html({
+                fileContent: readFile('test/cases/css-remote-relative-to-url.html'),
+                relativeTo: 'https://raw.githubusercontent.com/jrit/'
+            },
+            function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        );
+    });
+
     it('should inline scripts', function(done) {
         var expected = readFile('test/cases/script_out.html');
 
