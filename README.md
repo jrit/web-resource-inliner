@@ -70,8 +70,3 @@ If uglify is assigned `true`, JavaScript file will be minified before inlined.
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Run tests with `npm test`.
-
-
-## Release History
-* 2015-02-18 v1.0.1 use relativeTo with URLs to resolve web paths; use https: as default when paths start with //
-* 2015-01-01 v1.0.0 initial release: Forked and rewritten from grunt-inline with the goal of providing additional use cases and a new API
