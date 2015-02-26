@@ -202,6 +202,18 @@ describe('html', function() {
             }
         );
     });
+
+    it('should pass missing file errors up through callbacks', function(done) {
+        inline.html({
+                fileContent: readFile('test/cases/missing-file.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                assert.equal(!!err,true);
+                done();
+            }
+        );
+    });
 });
 
 describe('css', function() {

@@ -116,7 +116,15 @@ util.getTextReplacement = function( src, relativeTo, callback )
     }
     else
     {
-        callback( null, util.getInlineFileContents( src, relativeTo ) );
+        try
+        {
+            var replacement = util.getInlineFileContents( src, relativeTo );
+            return callback( null,  replacement );
+        }
+        catch (err)
+        {
+            return callback( err );
+        }
     }
 };
 
