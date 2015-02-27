@@ -6,6 +6,7 @@ var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
+var clc = require('cli-color');
 
 var util = {};
 
@@ -17,6 +18,7 @@ util.defaults = {
     links: true,
     uglify: false,
     cssmin: false,
+    strict: false,
     relativeTo: '',
     rebaseRelativeTo: '',
     inlineAttribute: 'data-inline',
@@ -138,5 +140,18 @@ util.getFileReplacement = function( src, relativeTo, callback )
     {
         var result = ( new datauri( util.getInlineFilePath( src, relativeTo ) ) ).content;
         callback( result === undefined ? new Error( "Local file not found" ) : null, result );
+    }
+};
+
+util.handleReplaceErr = function ( err, src, strict, callback )
+{
+    if( strict )
+    {
+        return callback( err );
+    }
+    else
+    {
+        console.warn( clc.yellow( "Not found, skipping: " + src ) );
+        return callback( null );
     }
 };

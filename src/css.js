@@ -25,7 +25,7 @@ module.exports = function( options, callback )
         {
             if( err )
             {
-                return( callback( err ) );
+                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {

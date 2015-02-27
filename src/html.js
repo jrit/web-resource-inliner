@@ -21,16 +21,16 @@ module.exports = function( options, callback )
         {
             if( err )
             {
-                return( callback( err ) );
+                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
             if( typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
             {
-                return( callback( null ) );
+                return callback( null );
             }
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
             result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
-            return( callback( null ) );
+            return callback( null );
         } );
     };
 
@@ -42,11 +42,11 @@ module.exports = function( options, callback )
         {
             if( err )
             {
-                return( callback( err ) );
+                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
             if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
             {
-                return( callback( null ) );
+                return callback( null );
             }
 
             var cssOptions = xtend( {}, settings, {
@@ -58,11 +58,11 @@ module.exports = function( options, callback )
             {
                 if( err )
                 {
-                    return( callback( err ) );
+                    return callback( err );
                 }
                 var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
                 result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
-                return( callback( null ) );
+                return callback( null );
             } );
         } );
     };
@@ -75,15 +75,15 @@ module.exports = function( options, callback )
         {
             if( err )
             {
-                return ( callback( err ) );
+                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
-                return ( callback( null ) );
+                return callback( null );
             }
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
             result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
-            return( callback( null ) );
+            return callback( null );
         } );
     };
 

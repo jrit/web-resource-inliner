@@ -191,10 +191,11 @@ describe('html', function() {
         );
     });
 
-    it('should pass HTTP errors up through callbacks', function(done) {
+    it('should pass HTTP errors up through callbacks when strict', function(done) {
         inline.html({
                 fileContent: readFile('test/cases/404.html'),
-                relativeTo: 'test/cases/'
+                relativeTo: 'test/cases/',
+                strict: true
             },
             function(err, result) {
                 assert.equal(!!err,true);
@@ -203,13 +204,44 @@ describe('html', function() {
         );
     });
 
-    it('should pass missing file errors up through callbacks', function(done) {
+    it('should pass missing file errors up through callbacks when strict', function(done) {
+        var expected = readFile('test/cases/missing-file.html');
+
+        inline.html({
+                fileContent: readFile('test/cases/missing-file.html'),
+                relativeTo: 'test/cases/',
+                strict: true
+            },
+            function(err, result) {
+                assert.equal(result, expected);
+                assert.equal(!!err,true);
+                done();
+            }
+        );
+    });
+
+    it('should console.warn HTTP errors when not strict', function(done) {
+        var expected = readFile('test/cases/404.html');
+
+        inline.html({
+                fileContent: readFile('test/cases/404.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                assert.equal(result, expected);
+                assert.equal(!!err,false);
+                done();
+            }
+        );
+    });
+
+    it('should console.warn missing file errors when not strict', function(done) {
         inline.html({
                 fileContent: readFile('test/cases/missing-file.html'),
                 relativeTo: 'test/cases/'
             },
             function(err, result) {
-                assert.equal(!!err,true);
+                assert.equal(!!err,false);
                 done();
             }
         );
