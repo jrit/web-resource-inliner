@@ -67,6 +67,9 @@ If cssmin is assigned `true`, CSS will be minified before inlined.
 #### `uglify`, Boolean, default `false`
 If uglify is assigned `true`, JavaScript file will be minified before inlined.
 
+#### `strict`, Boolean, default `false`
+When strict is `true`, a missing resource will cause the inliner to halt and return an error in the callback. The default behavior is to log a warning to the console and continue inlining with the available resources, which is more similar to how a web page behaves.
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Run tests with `npm test`.

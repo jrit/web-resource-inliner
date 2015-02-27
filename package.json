@@ -6,7 +6,7 @@
   },
   "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "keywords": [
     "inline",
     "js",
