@@ -25,6 +25,20 @@ util.defaults = {
     fileContent: ''
 };
 
+/**
+ * Escape regex character classes of a particular string
+ * 
+ * @example
+ * "http://www.test.com" --> "http:\/\/www\.test\.com"
+ *     
+ * @param  {String} str - string to escape
+ * @return {String} string with character classes escaped
+ */
+util.escapeCharClass = function(str)
+{
+    return str.replace(/(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, '\\$1');
+};
+
 util.isRemotePath = function( url )
 {
     return url.match( /^'?https?:\/\// ) || url.match( /^\/\// );
