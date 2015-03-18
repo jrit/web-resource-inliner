@@ -26,15 +26,15 @@ util.defaults = {
 };
 
 /**
- * Escape regex character classes of a particular string
+ * Escape special regex characters of a particular string
  * 
  * @example
  * "http://www.test.com" --> "http:\/\/www\.test\.com"
  *     
  * @param  {String} str - string to escape
- * @return {String} string with character classes escaped
+ * @return {String} string with special characters escaped
  */
-util.escapeCharClass = function(str)
+util.escapeSpecialChars = function(str)
 {
     return str.replace(/(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, '\\$1');
 };
