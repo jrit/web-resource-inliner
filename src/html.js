@@ -62,7 +62,8 @@ module.exports = function( options, callback )
                     return callback( err );
                 }
                 var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
-                result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ), html );
+                result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ),
+                    function( ) { return html; } );
                 return callback( null );
             } );
         } );
@@ -83,7 +84,8 @@ module.exports = function( options, callback )
                 return callback( null );
             }
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
-            result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ), html );
+            result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ),
+                function( ) { return html; } );
             return callback( null );
         } );
     };

@@ -33,7 +33,8 @@ module.exports = function( options, callback )
             }
 
             var css = 'url("' + datauriContent + '");';
-            result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + args.src + ")[\"']?\\s?\\);", "g" ), css );
+            result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + args.src + ")[\"']?\\s?\\);", "g" ),
+                function( ) { return css; } );
             return( callback( null ) );
         } );
     };
@@ -41,7 +42,8 @@ module.exports = function( options, callback )
     var rebase = function( src )
     {
         var css = 'url("' + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + '");';
-        result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + src + ")[\"']?\\s?\\);", "g" ), css );
+        result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + src + ")[\"']?\\s?\\);", "g" ),
+            function( ) { return css; } );
     };
 
     var result = settings.fileContent;
