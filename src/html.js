@@ -29,7 +29,8 @@ module.exports = function( options, callback )
                 return callback( null );
             }
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
-            result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ), html );
+            result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ),
+                function( ) { return html; } );
             return callback( null );
         } );
     };
