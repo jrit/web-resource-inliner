@@ -246,6 +246,18 @@ describe('html', function() {
             }
         );
     });
+
+    it('should properly escape regex vars before calling replace()', function(done) {
+        inline.html({
+                fileContent: readFile('test/cases/script-regex-escape.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                assert.equal(result.indexOf('$&') > -1, true);
+                done();
+            }
+        );
+    });
 });
 
 describe('css', function() {
