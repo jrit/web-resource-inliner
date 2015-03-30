@@ -283,9 +283,16 @@ describe("util", function() {
 
     describe("#escapeSpecialChars", function() {
         it("should escape special regex characters in a string", function() {
-            var input = 'http://fonts.googleapis.com/css?family=Open+Sans';
-            var output = 'http:\/\/fonts\.googleapis\.com\/css\?family=Open\+Sans';
-            assert.equal(input, output);
+            
+            var str = 'http://fonts.googleapis.com/css?family=Open+Sans';
+            var expected = 'http:\\/\\/fonts\\.googleapis\\.com\\/css\\?family=Open\\+Sans';
+            
+            var result = util.escapeSpecialChars(str);
+            var regex = new RegExp(result, "g");
+
+            assert.equal(result, expected);
+            assert.equal(str.match(regex).length, 1);
+
         });
     });
 
