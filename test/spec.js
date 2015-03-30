@@ -1,6 +1,7 @@
 var assert = require('assert');
 var fs = require('fs');
 var inline = require('../src/inline.js');
+var util = require('../src/util.js');
 
 function normalize(contents) {
     return (process.platform === 'win32' ? contents.replace(/\r\n/g, '\n') : contents);
@@ -276,4 +277,16 @@ describe('css', function() {
             }
         );
     });
+});
+
+describe("util", function() {
+
+    describe("#escapeSpecialChars", function() {
+        it("should escape special regex characters in a string", function() {
+            var input = 'http://fonts.googleapis.com/css?family=Open+Sans';
+            var output = 'http:\/\/fonts\.googleapis\.com\/css\?family=Open\+Sans';
+            assert.equal(input, output);
+        });
+    });
+
 });
