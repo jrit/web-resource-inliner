@@ -25,6 +25,20 @@ util.defaults = {
     fileContent: ''
 };
 
+/**
+ * Escape special regex characters of a particular string
+ * 
+ * @example
+ * "http://www.test.com" --> "http:\/\/www\.test\.com"
+ *     
+ * @param  {String} str - string to escape
+ * @return {String} string with special characters escaped
+ */
+util.escapeSpecialChars = function(str)
+{
+    return str.replace(/(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, '\\$1');
+};
+
 util.isRemotePath = function( url )
 {
     return url.match( /^'?https?:\/\// ) || url.match( /^\/\// );

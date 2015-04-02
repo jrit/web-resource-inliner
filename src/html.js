@@ -29,8 +29,10 @@ module.exports = function( options, callback )
                 return callback( null );
             }
             var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
-            result = result.replace( new RegExp( "<script.+?src=[\"'](" + args.src + ")[\"'].*?>\s*<\/script>", "g" ),
+
+            result = result.replace( new RegExp( "<script.+?src=[\"'](" + inline.escapeSpecialChars(args.src) + ")[\"'].*?>\s*<\/script>", "g" ),
                 function( ) { return html; } );
+
             return callback( null );
         } );
     };
@@ -62,8 +64,10 @@ module.exports = function( options, callback )
                     return callback( err );
                 }
                 var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
-                result = result.replace( new RegExp( "<link.+?href=[\"'](" + args.src + ")[\"'].*?\/?>", "g" ),
+
+                result = result.replace( new RegExp( "<link.+?href=[\"'](" + inline.escapeSpecialChars(args.src) + ")[\"'].*?\/?>", "g" ),
                     function( ) { return html; } );
+
                 return callback( null );
             } );
         } );
@@ -84,7 +88,7 @@ module.exports = function( options, callback )
                 return callback( null );
             }
             var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
-            result = result.replace( new RegExp( "<img.+?src=[\"'](" + args.src + ")[\"'].*?\/?\s*?>", "g" ),
+            result = result.replace( new RegExp( "<img.+?src=[\"'](" + inline.escapeSpecialChars(args.src) + ")[\"'].*?\/?\s*?>", "g" ),
                 function( ) { return html; } );
             return callback( null );
         } );
