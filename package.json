@@ -6,7 +6,7 @@
   },
   "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "keywords": [
     "inline",
     "js",
@@ -41,7 +41,5 @@
   "scripts": {
     "test": "mocha test",
     "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --ui bdd -R spec"
-  },
-  "_id": "grunt-inline@0.1.0",
-  "_from": "grunt-inline@~0.1.0"
+  }
 }
