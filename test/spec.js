@@ -95,11 +95,37 @@ describe('html', function() {
         );
     });
 
+    it('should inline local and remote multiline links', function (done) {
+        var expected = readFile('test/cases/css-multiline_out.html');
+
+        inline.html({
+              fileContent: readFile('test/cases/css-multiline.html'),
+              relativeTo: 'test/cases/'
+          },
+          function(err, result) {
+              testEquality(err, result, expected, done);
+          }
+        );
+    });
+
     it('should inline scripts', function(done) {
         var expected = readFile('test/cases/script_out.html');
 
         inline.html({
                 fileContent: readFile('test/cases/script.html'),
+                relativeTo: 'test/cases/'
+            },
+            function(err, result) {
+                testEquality(err, result, expected, done);
+            }
+        );
+    });
+
+    it('should inline multiline scripts', function(done) {
+        var expected = readFile('test/cases/script-multiline_out.html');
+
+        inline.html({
+                fileContent: readFile('test/cases/script-multiline.html'),
                 relativeTo: 'test/cases/'
             },
             function(err, result) {
@@ -133,6 +159,20 @@ describe('html', function() {
             function(err, result) {
                 testEquality(err, result, expected, done);
             }
+        );
+    });
+
+    it('should inline images in one line', function (done) {
+        var expected = readFile('test/cases/img-singleline_out.html');
+
+        inline.html({
+              fileContent: readFile('test/cases/img-singleline.html'),
+              relativeTo: 'test/cases/',
+              images: true
+          },
+          function(err, result) {
+              testEquality(err, result, expected, done);
+          }
         );
     });
 
@@ -295,10 +335,10 @@ describe("util", function() {
 
     describe("#escapeSpecialChars", function() {
         it("should escape special regex characters in a string", function() {
-            
+
             var str = 'http://fonts.googleapis.com/css?family=Open+Sans';
             var expected = 'http:\\/\\/fonts\\.googleapis\\.com\\/css\\?family=Open\\+Sans';
-            
+
             var result = util.escapeSpecialChars(str);
             var regex = new RegExp(result, "g");
 
