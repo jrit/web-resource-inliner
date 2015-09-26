@@ -146,7 +146,11 @@ util.getTextReplacement = function( src, relativeTo, callback )
 
 util.getFileReplacement = function( src, relativeTo, callback )
 {
-    if( util.isRemotePath( src ) )
+    if( util.isRemotePath( relativeTo ) )
+    {
+        util.getRemote( url.resolve( relativeTo, src ), callback, true );
+    }
+    else if( util.isRemotePath( src ) )
     {
         util.getRemote( src, callback, true );
     }
