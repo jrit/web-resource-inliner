@@ -2,6 +2,7 @@
 
 var path = require( "path" );
 var UglifyJS = require( "uglify-js" );
+var _ = require( "lodash" );
 var xtend = require( "xtend" );
 var async = require( "async" );
 var inline = require( "./util" );
@@ -108,48 +109,51 @@ module.exports = function( options, callback )
     var tasks = [];
     var found;
 
-    var scriptRegex = /<script[\s\S]+?src=["']([^"']+?)["'][\s\S]*?>\s*<\/script>/g;
+    var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "gi" );
+    var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "gi" );
+
+    var scriptRegex = /<script\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
     while( ( found = scriptRegex.exec( result ) ) !== null )
     {
-        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
-            && ( settings.scripts || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
+            && ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceScript.bind(
             {
                 element: found[ 0 ],
-                src: found[ 1 ],
+                src: _.unescape(found[ 2 ]).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.scripts
             } ) );
         }
     }
 
-    var linkRegex = /<link[\s\S]+?href=["']([^"']+?)["'][\s\S]*?\/?>/g;
+    var linkRegex = /<link\b[\s\S]+?\bhref\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
     while( ( found = linkRegex.exec( result ) ) !== null )
     {
-        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
-            && ( settings.links || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
+            && ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceLink.bind(
             {
                 element: found[ 0 ],
-                src: found[ 1 ],
+                src: _.unescape(found[ 2 ]).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.links
             } ) );
         }
     }
 
-    var imgRegex = /<img[\s\S]+?src=["']([^"']+?)["'][\s\S]*?\/?\s*?>/g;
+    var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
     while( ( found = imgRegex.exec( result ) ) !== null )
     {
-        if( !found[ 0 ].match( new RegExp( settings.inlineAttribute + "-ignore", "gi" ) )
-            && ( settings.images || found[ 0 ].match( new RegExp( settings.inlineAttribute, "gi" ) ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
+            && ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceImg.bind(
             {
                 element: found[ 0 ],
-                src: found[ 1 ],
+                src: _.unescape(found[ 2 ]).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.images
             } ) );
