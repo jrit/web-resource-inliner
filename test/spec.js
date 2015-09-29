@@ -1,7 +1,11 @@
 var assert = require('assert');
 var fs = require('fs');
+var path = require('path');
+var http = require('http');
 var inline = require('../src/inline.js');
 var util = require('../src/util.js');
+var fauxJax = require('faux-jax');
+var mime = require('mime-types');
 
 function normalize(contents) {
     return (process.platform === 'win32' ? contents.replace(/\r\n/g, '\n') : contents);
@@ -298,6 +302,38 @@ describe('html', function() {
                 done();
             }
         );
+    });
+
+    describe('(using mocks)', function() {
+        var baseUrl = 'http://example.com/';
+
+        beforeEach(function() {
+            fauxJax.install();
+            fauxJax.on('request', function(request) {
+                assert.equal(request.requestURL.indexOf(baseUrl), 0);
+                var relativePath = request.requestURL.slice(baseUrl.length);
+                var headers = {
+                    'Content-Type': mime.contentType(path.extname(relativePath)) || 'application/octet-stream'
+                };
+                var content = fs.readFileSync('test/cases/' + relativePath);
+                request.respond(200, headers, content);
+            });
+        });
+
+        afterEach(function() {
+            fauxJax.restore();
+        });
+
+        it('should use the base url (relativeTo) to resolve image URLs', function(done) {
+            var expected = readFile('test/cases/img_out.html');
+            inline.html({
+                fileContent: readFile('test/cases/img.html'),
+                relativeTo: baseUrl,
+                images: true
+            }, function(err, result) {
+                testEquality(err, result, expected, done);
+            });
+        });
     });
 });
 
