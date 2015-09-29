@@ -1,4 +1,5 @@
 ## Release History
+* 2015-09-28 v1.1.4 Fixes relativeTo support for images
 * 2015-07-23 v1.1.2 Multiline support
 * 2015-04-19 v1.1.1 Fixes to regex usage from PRs 3 and 4
 * 2015-02-27 v1.1.0 Enhancement: add `strict` option and change behavior to be `false` by default. Previous behavior was equivalent to `strict=true`.
