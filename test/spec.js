@@ -344,6 +344,27 @@ describe('html', function() {
                 images: true
             }, done);
         });
+
+        it('should understand the spaces to the sides of = when parsing attributes', function(done) {
+            var count = 0;
+            fauxJax.on('request', function(request) {
+                count++;
+            });
+            inline.html({
+                fileContent: '<img src = "assets/icon.png">' +
+                    '<script src ="assets/export.js"></script>' +
+                    '<script src =\n"assets/export.js?foo=1"></script>' +
+                    '<link href=  "assets/simple.css" rel="stylesheet"/>',
+                relativeTo: baseUrl,
+                scripts: true,
+                links: true,
+                images: true
+            }, function() {
+                assert.equal(count, 4);
+                done();
+            });
+        });
+
     });
 });
 
