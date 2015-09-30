@@ -1,7 +1,6 @@
 var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
-var http = require('http');
 var inline = require('../src/inline.js');
 var util = require('../src/util.js');
 var fauxJax = require('faux-jax');
@@ -304,14 +303,14 @@ describe('html', function() {
         );
     });
 
-    describe('(using mocks)', function() {
+    describe('(http mocking)', function() {
         var baseUrl = 'http://example.com/';
 
         beforeEach(function() {
             fauxJax.install();
             fauxJax.on('request', function(request) {
                 assert.equal(request.requestURL.indexOf(baseUrl), 0);
-                var relativePath = request.requestURL.slice(baseUrl.length);
+                var relativePath = request.requestURL.slice(baseUrl.length).replace(/\?.*/, '');
                 var headers = {
                     'Content-Type': mime.contentType(path.extname(relativePath)) || 'application/octet-stream'
                 };
@@ -334,6 +333,38 @@ describe('html', function() {
                 testEquality(err, result, expected, done);
             });
         });
+
+        it('should unescape HTML entities when extracting URLs from attributes', function(done) {
+            fauxJax.on('request', function(request) {
+                assert(!/&\w+;/.test(request.url));
+            });
+            inline.html({
+                fileContent: '<img src="assets/icon.png?a=b&amp;c=\'d\'" /><img src="assets/icon.png?a=b&amp;c=\'d\'&amp;&amp;">',
+                relativeTo: baseUrl,
+                images: true
+            }, done);
+        });
+
+        it('should understand the spaces to the sides of = when parsing attributes', function(done) {
+            var count = 0;
+            fauxJax.on('request', function(request) {
+                count++;
+            });
+            inline.html({
+                fileContent: '<img src = "assets/icon.png">' +
+                    '<script src ="assets/export.js"></script>' +
+                    '<script src =\n"assets/export.js?foo=1"></script>' +
+                    '<link href=  "assets/simple.css" rel="stylesheet"/>',
+                relativeTo: baseUrl,
+                scripts: true,
+                links: true,
+                images: true
+            }, function() {
+                assert.equal(count, 4);
+                done();
+            });
+        });
+
     });
 });
 
