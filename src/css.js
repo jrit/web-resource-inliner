@@ -1,11 +1,10 @@
 "use strict";
 
-
-var datauri = require( "datauri" );
 var CleanCSS = require( "clean-css" );
 var xtend = require( "xtend" );
 var async = require( "async" );
 var path = require( "path" );
+var _ = require( "lodash" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
@@ -18,7 +17,7 @@ module.exports = function( options, callback )
 
         if( inline.isBase64Path( args.src ) )
         {
-            return callback( null ); // skip
+            return callback( null ); // Skip
         }
 
         inline.getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
@@ -29,22 +28,22 @@ module.exports = function( options, callback )
             }
             if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
-                return( callback( null ) ); // skip
+                return callback( null ); // Skip
             }
 
-            var css = 'url("' + datauriContent + '");';
-            result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars(args.src) + ")[\"']?\\s?\\);", "g" ),
-                function( ) { return css; } );
+            var css = "url(\"" + datauriContent + "\");";
+            var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\);", "g" );
+            result = result.replace( re, _.constant( css ) );
 
-            return( callback( null ) );
+            return callback( null );
         } );
     };
 
     var rebase = function( src )
     {
-        var css = 'url("' + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + '");';
-        result = result.replace( new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars(src) + ")[\"']?\\s?\\);", "g" ),
-            function( ) { return css; } );
+        var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\");";
+        var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\);", "g" );
+        result = result.replace( re, _.constant( css ) );
     };
 
     var result = settings.fileContent;
@@ -60,14 +59,18 @@ module.exports = function( options, callback )
             var src = found[ 1 ];
             if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
             {
-               rebase( src );
+                rebase( src );
             }
         }
     }
+
+    var inlineAttributeCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s?\\*\\/", "i" );
+    var inlineAttributeIgnoreCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "i" );
+
     while( ( found = urlRegex.exec( result ) ) !== null )
     {
-        if( !found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "gi" ) )
-            && ( settings.images || found[ 0 ].match( new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s?\\*\\/", "gi" ) ) ) )
+        if( !inlineAttributeIgnoreCommentRegex.test( found[ 0 ] ) &&
+            ( settings.images || inlineAttributeCommentRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceUrl.bind(
             {

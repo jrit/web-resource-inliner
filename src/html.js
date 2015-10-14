@@ -10,19 +10,20 @@ var css = require( "./css" );
 
 module.exports = function( options, callback )
 {
-    var settings = xtend({}, inline.defaults, options );
+    var settings = xtend( {}, inline.defaults, options );
 
-    function replaceInlineAttribute(string) {
+    function replaceInlineAttribute( string )
+    {
         return string
-          .replace( new RegExp( " " + settings.inlineAttribute + "-ignore", "gi" ), "" )
-          .replace( new RegExp( " " + settings.inlineAttribute, "gi" ), "" );
+            .replace( new RegExp( " " + settings.inlineAttribute + "-ignore", "gi" ), "" )
+            .replace( new RegExp( " " + settings.inlineAttribute, "gi" ), "" );
     }
 
     var replaceScript = function( callback )
     {
         var args = this;
 
-        args.element = replaceInlineAttribute(args.element);
+        args.element = replaceInlineAttribute( args.element );
 
         inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
@@ -35,11 +36,9 @@ module.exports = function( options, callback )
             {
                 return callback( null );
             }
-            var html = '<script' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + js + '\n</script>';
-
-            result = result.replace( new RegExp( inline.escapeSpecialChars(args.element) , "g" ),
-                function( ) { return html; } );
-
+            var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + js + "\n</script>";
+            var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+            result = result.replace( re, _.constant( html ) );
             return callback( null );
         } );
     };
@@ -48,7 +47,7 @@ module.exports = function( options, callback )
     {
         var args = this;
 
-        args.element = replaceInlineAttribute(args.element);
+        args.element = replaceInlineAttribute( args.element );
 
         inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
         {
@@ -66,17 +65,15 @@ module.exports = function( options, callback )
                 rebaseRelativeTo: path.relative( settings.relativeTo, path.join( settings.relativeTo, args.src, ".." + path.sep ) )
             } );
 
-            css( cssOptions, function ( err, content )
+            css( cssOptions, function( err, content )
             {
                 if( err )
                 {
                     return callback( err );
                 }
-                var html = '<style' + ( args.attrs ? ' ' + args.attrs : '' ) + '>\n' + content + '\n</style>';
-
-                result = result.replace( new RegExp( inline.escapeSpecialChars(args.element) , "g" ),
-                    function( ) { return html; } );
-
+                var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
+                var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+                result = result.replace( re, _.constant( html ) );
                 return callback( null );
             } );
         } );
@@ -86,7 +83,7 @@ module.exports = function( options, callback )
     {
         var args = this;
 
-        args.element = replaceInlineAttribute(args.element);
+        args.element = replaceInlineAttribute( args.element );
 
         inline.getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
         {
@@ -98,9 +95,9 @@ module.exports = function( options, callback )
             {
                 return callback( null );
             }
-            var html = '<img' + ( args.attrs ? ' ' + args.attrs : '' ) + ' src="' + datauriContent + '" />';
-            result = result.replace( new RegExp( inline.escapeSpecialChars(args.element) , "g" ),
-                function( ) { return html; } );
+            var html = "<img" + ( args.attrs ? " " + args.attrs : "" ) + " src=\"" + datauriContent + "\" />";
+            var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+            result = result.replace( re, _.constant( html ) );
             return callback( null );
         } );
     };
@@ -109,19 +106,19 @@ module.exports = function( options, callback )
     var tasks = [];
     var found;
 
-    var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "gi" );
-    var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "gi" );
+    var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "i" );
+    var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "i" );
 
     var scriptRegex = /<script\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
     while( ( found = scriptRegex.exec( result ) ) !== null )
     {
-        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
-            && ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceScript.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape(found[ 2 ]).trim(),
+                src: _.unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.scripts
             } ) );
@@ -131,13 +128,13 @@ module.exports = function( options, callback )
     var linkRegex = /<link\b[\s\S]+?\bhref\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
     while( ( found = linkRegex.exec( result ) ) !== null )
     {
-        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
-            && ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceLink.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape(found[ 2 ]).trim(),
+                src: _.unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.links
             } ) );
@@ -147,20 +144,20 @@ module.exports = function( options, callback )
     var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
     while( ( found = imgRegex.exec( result ) ) !== null )
     {
-        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] )
-            && ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceImg.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape(found[ 2 ]).trim(),
+                src: _.unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.images
             } ) );
         }
     }
 
-    result = replaceInlineAttribute(result);
+    result = replaceInlineAttribute( result );
 
     async.parallel( tasks, function( err )
     {

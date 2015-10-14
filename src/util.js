@@ -1,12 +1,11 @@
 "use strict";
 
-
 var path = require( "path" );
 var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
-var clc = require('cli-color');
+var clc = require( "cli-color" );
 
 var util = {};
 
@@ -19,40 +18,40 @@ util.defaults = {
     uglify: false,
     cssmin: false,
     strict: false,
-    relativeTo: '',
-    rebaseRelativeTo: '',
-    inlineAttribute: 'data-inline',
-    fileContent: ''
+    relativeTo: "",
+    rebaseRelativeTo: "",
+    inlineAttribute: "data-inline",
+    fileContent: ""
 };
 
 /**
  * Escape special regex characters of a particular string
- * 
+ *
  * @example
  * "http://www.test.com" --> "http:\/\/www\.test\.com"
- *     
+ *
  * @param  {String} str - string to escape
  * @return {String} string with special characters escaped
  */
-util.escapeSpecialChars = function(str)
+util.escapeSpecialChars = function( str )
 {
-    return str.replace(/(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, '\\$1');
+    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, "\\$1" );
 };
 
 util.isRemotePath = function( url )
 {
-    return url.match( /^'?https?:\/\// ) || url.match( /^\/\// );
+    return /^'?https?:\/\/|^\/\//.test( url );
 };
 
 util.isBase64Path = function( url )
 {
-    return url.match( /^'?data.*base64/ );
+    return /^'?data.*base64/.test( url );
 };
 
 util.getAttrs = function( tagMarkup, settings )
 {
     var tag = tagMarkup.match( /^<[^\W>]*/ );
-    if ( tag )
+    if( tag )
     {
         tag = tag[ 0 ];
         var attrs = tagMarkup
@@ -62,11 +61,11 @@ util.getAttrs = function( tagMarkup, settings )
             .replace( new RegExp( settings.inlineAttribute + "-ignore", "gi" ), "" )
             .replace( new RegExp( settings.inlineAttribute, "gi" ), "" );
 
-        if ( tag === "<script" || tag === "<img" )
+        if( tag === "<script" || tag === "<img" )
         {
             return attrs.replace( /(src|language|type)=["'][^"']*["']/gi, "" ).trim();
         }
-        else if ( tag === "<link" )
+        else if( tag === "<link" )
         {
             return attrs.replace( /(href|rel)=["'][^"']*["']/g, "" ).trim();
         }
@@ -75,7 +74,7 @@ util.getAttrs = function( tagMarkup, settings )
 
 util.getRemote = function( uri, callback, toDataUri )
 {
-    if( uri.match(/^\/\//) )
+    if( /^\/\//.test( uri ) )
     {
         uri = "https:" + uri;
     }
@@ -91,7 +90,7 @@ util.getRemote = function( uri, callback, toDataUri )
             {
                 return callback( err );
             }
-            else if ( response.statusCode !== 200 )
+            else if( response.statusCode !== 200 )
             {
                 return callback( new Error( uri + " returned http " + response.code ) );
             }
@@ -100,7 +99,7 @@ util.getRemote = function( uri, callback, toDataUri )
             {
                 var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
                 var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
-                return( callback( null, datauriContent ) );
+                return callback( null, datauriContent );
             }
             else
             {
@@ -111,8 +110,8 @@ util.getRemote = function( uri, callback, toDataUri )
 
 util.getInlineFilePath = function( src, relativeTo )
 {
-    src = src.replace( /^\//, '' );
-    return path.resolve( relativeTo, src ).replace( /\?.*$/, '' );
+    src = src.replace( /^\//, "" );
+    return path.resolve( relativeTo, src ).replace( /\?.*$/, "" );
 };
 
 util.getInlineFileContents = function( src, relativeTo )
@@ -135,9 +134,9 @@ util.getTextReplacement = function( src, relativeTo, callback )
         try
         {
             var replacement = util.getInlineFileContents( src, relativeTo );
-            return callback( null,  replacement );
+            return callback( null, replacement );
         }
-        catch (err)
+        catch( err )
         {
             return callback( err );
         }
@@ -161,7 +160,7 @@ util.getFileReplacement = function( src, relativeTo, callback )
     }
 };
 
-util.handleReplaceErr = function ( err, src, strict, callback )
+util.handleReplaceErr = function( err, src, strict, callback )
 {
     if( strict )
     {

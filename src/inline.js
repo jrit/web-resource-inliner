@@ -6,7 +6,7 @@
  * Based on https://github.com/chyingp/grunt-inline
  */
 
-'use strict';
+"use strict";
 
 var inline = {};
 
