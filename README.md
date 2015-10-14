@@ -70,6 +70,8 @@ If uglify is assigned `true`, JavaScript file will be minified before inlined.
 #### `strict`, Boolean, default `false`
 When strict is `true`, a missing resource will cause the inliner to halt and return an error in the callback. The default behavior is to log a warning to the console and continue inlining with the available resources, which is more similar to how a web page behaves.
 
+#### `requestTransform`, Function, default `undefined`
+Allows to adjust issued requests. E.g., add authentication tokens to requested URLs. The function is called with the request options object as its parameter. It can modify this object or return a new one. See [the list of available options](https://www.npmjs.com/package/request#request-options-callback).
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Run tests with `npm test`.

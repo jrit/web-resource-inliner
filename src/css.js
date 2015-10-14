@@ -20,7 +20,7 @@ module.exports = function( options, callback )
             return callback( null ); // Skip
         }
 
-        inline.getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
+        inline.getFileReplacement( args.src, settings, function( err, datauriContent )
         {
             if( err )
             {

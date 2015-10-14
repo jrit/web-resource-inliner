@@ -426,6 +426,26 @@ describe( "html", function()
             } );
         } );
 
+        it( "should apply the requestTransform option", function( done ) {
+            fauxJax.on( "request", function( request )
+            {
+                assert( request.requestURL.indexOf( "foo=bar" ) !== -1 );
+            } );
+            inline.html( {
+                fileContent: "<img src=\"assets/icon.png\"><img src=\"assets/icon.png?a=1\">",
+                relativeTo: baseUrl,
+                scripts: true,
+                links: true,
+                images: true,
+                requestTransform: function(options)
+                {
+                    options.qs = {
+                        foo: "bar"
+                    };
+                }
+            }, done );
+        } );
+
     } );
 } );
 

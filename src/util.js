@@ -74,18 +74,25 @@ util.getAttrs = function( tagMarkup, settings )
     }
 };
 
-util.getRemote = function( uri, callback, toDataUri )
+function getRemote( uri, settings, callback, toDataUri )
 {
     if( /^\/\//.test( uri ) )
     {
         uri = "https:" + uri;
     }
 
+    var requestOptions = {
+        uri: uri,
+        encoding: toDataUri ? "binary" : ""
+    };
+
+    if( typeof settings.requestTransform === "function" )
+    {
+        requestOptions = settings.requestTransform( requestOptions ) || requestOptions;
+    }
+
     request(
-        {
-            uri: uri,
-            encoding: toDataUri ? "binary" : ""
-        },
+        requestOptions,
         function( err, response, body )
         {
             if( err )
@@ -108,7 +115,7 @@ util.getRemote = function( uri, callback, toDataUri )
                 return callback( null, body );
             }
         } );
-};
+}
 
 util.getInlineFilePath = function( src, relativeTo )
 {
@@ -121,21 +128,21 @@ util.getInlineFileContents = function( src, relativeTo )
     return fs.readFileSync( util.getInlineFilePath( src, relativeTo ) );
 };
 
-util.getTextReplacement = function( src, relativeTo, callback )
+util.getTextReplacement = function( src, settings, callback )
 {
-    if( util.isRemotePath( relativeTo ) )
+    if( util.isRemotePath( settings.relativeTo ) || util.isRemotePath( src ) )
     {
-        util.getRemote( url.resolve( relativeTo, src ), callback );
+        getRemote( url.resolve( settings.relativeTo, src ), settings, callback );
     }
     else if( util.isRemotePath( src ) )
     {
-        util.getRemote( src, callback );
+        getRemote( src, settings, callback );
     }
     else
     {
         try
         {
-            var replacement = util.getInlineFileContents( src, relativeTo );
+            var replacement = util.getInlineFileContents( src, settings.relativeTo );
         }
         catch( err )
         {
@@ -145,19 +152,19 @@ util.getTextReplacement = function( src, relativeTo, callback )
     }
 };
 
-util.getFileReplacement = function( src, relativeTo, callback )
+util.getFileReplacement = function( src, settings, callback )
 {
-    if( util.isRemotePath( relativeTo ) )
+    if( util.isRemotePath( settings.relativeTo ) )
     {
-        util.getRemote( url.resolve( relativeTo, src ), callback, true );
+        getRemote( url.resolve( settings.relativeTo, src ), settings, callback, true );
     }
     else if( util.isRemotePath( src ) )
     {
-        util.getRemote( src, callback, true );
+        getRemote( src, settings, callback, true );
     }
     else
     {
-        var result = ( new datauri( util.getInlineFilePath( src, relativeTo ) ) ).content;
+        var result = ( new datauri( util.getInlineFilePath( src, settings.relativeTo ) ) ).content;
         callback( result === undefined ? new Error( "Local file not found" ) : null, result );
     }
 };
