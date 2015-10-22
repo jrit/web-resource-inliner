@@ -15,8 +15,8 @@ module.exports = function( options, callback )
     function replaceInlineAttribute( string )
     {
         return string
-            .replace( new RegExp( " " + settings.inlineAttribute + "-ignore", "gi" ), "" )
-            .replace( new RegExp( " " + settings.inlineAttribute, "gi" ), "" );
+            .replace( new RegExp( " " + settings.inlineAttribute + "-ignore" + inline.attrValueExpression, "gi" ), "" )
+            .replace( new RegExp( " " + settings.inlineAttribute + inline.attrValueExpression, "gi" ), "" );
     }
 
     var replaceScript = function( callback )
