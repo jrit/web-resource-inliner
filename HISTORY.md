@@ -1,4 +1,5 @@
 ## Release History
+* 2015-10-23 v1.1.5 Fix: Unescape HTML entities in the URLs extracted from attributes. Fix: Move callback outside of `try` block
 * 2015-09-28 v1.1.4 Fixes relativeTo support for images
 * 2015-07-23 v1.1.2 Multiline support
 * 2015-04-19 v1.1.1 Fixes to regex usage from PRs 3 and 4
