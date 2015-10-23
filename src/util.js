@@ -134,12 +134,12 @@ util.getTextReplacement = function( src, relativeTo, callback )
         try
         {
             var replacement = util.getInlineFileContents( src, relativeTo );
-            return callback( null, replacement );
         }
         catch( err )
         {
             return callback( err );
         }
+        return callback( null, replacement );
     }
 };
 
