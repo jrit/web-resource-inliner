@@ -24,6 +24,8 @@ util.defaults = {
     fileContent: ""
 };
 
+util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
+
 /**
  * Escape special regex characters of a particular string
  *
@@ -58,8 +60,8 @@ util.getAttrs = function( tagMarkup, settings )
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
             .replace( />?\s?<\/[^>]*>$/, "" )
-            .replace( new RegExp( settings.inlineAttribute + "-ignore", "gi" ), "" )
-            .replace( new RegExp( settings.inlineAttribute, "gi" ), "" );
+            .replace( new RegExp( settings.inlineAttribute + "-ignore" + util.attrValueExpression, "gi" ), "" )
+            .replace( new RegExp( settings.inlineAttribute + util.attrValueExpression, "gi" ), "" );
 
         if( tag === "<script" || tag === "<img" )
         {
