@@ -94,7 +94,7 @@ util.getRemote = function( uri, callback, toDataUri )
             }
             else if( response.statusCode !== 200 )
             {
-                return callback( new Error( uri + " returned http " + response.code ) );
+                return callback( new Error( uri + " returned http " + response.statusCode ) );
             }
 
             if( toDataUri )
