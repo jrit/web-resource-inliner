@@ -284,7 +284,7 @@ describe( "html", function()
             },
             function( err, result )
             {
-                assert.equal( !!err, true );
+                assert.equal( err.message, "https://raw.githubusercontent.com/not-a-file.css returned http 400" );
                 done();
             }
         );
