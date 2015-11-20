@@ -108,6 +108,7 @@ module.exports = function( options, callback )
 
     var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "i" );
     var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "i" );
+    var relStylesheetAttributeIgnoreRegex = new RegExp( "stylesheet", "i" );
 
     var scriptRegex = /<script\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
     while( ( found = scriptRegex.exec( result ) ) !== null )
@@ -129,6 +130,7 @@ module.exports = function( options, callback )
     while( ( found = linkRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            relStylesheetAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceLink.bind(
