@@ -109,7 +109,7 @@ module.exports = function( options, callback )
     var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "i" );
     var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "i" );
 
-    var scriptRegex = /<script\b[\s]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
+    var scriptRegex = /<script\b[^>]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
     while( ( found = scriptRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
