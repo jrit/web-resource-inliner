@@ -53,11 +53,12 @@ util.isBase64Path = function( url )
 
 util.getAttrs = function( tagMarkup, settings )
 {
-    var tag = tagMarkup.match( /^<[^\W>]*/ );
+  var tag = tagMarkup.match( /^<[^\W>]*/ );
     if( tag )
     {
         tag = tag[ 0 ];
         var attrs = tagMarkup
+            .replace( />[\s\S]*<\//, "><\/")
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
             .replace( />?\s?<\/[^>]*>$/, "" )
