@@ -36,6 +36,11 @@ module.exports = function( options, callback )
             {
                 return callback( null );
             }
+            js = "" + js
+            js = js.replace("</script>", "<\\/script>")
+
+            
+          
             var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + js + "\n</script>";
             var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
             result = result.replace( re, _.constant( html ) );
