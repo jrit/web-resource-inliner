@@ -6,6 +6,7 @@ var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
 var clc = require( "cli-color" );
+var zlib = require("zlib");
 
 var util = {};
 
@@ -76,38 +77,42 @@ util.getAttrs = function( tagMarkup, settings )
 
 util.getRemote = function( uri, callback, toDataUri )
 {
-    if( /^\/\//.test( uri ) )
+  if( /^\/\//.test( uri ) )
+  {
+    uri = "https:" + uri;
+  }
+
+  request(
     {
-        uri = "https:" + uri;
-    }
+      uri: uri,
+      encoding: toDataUri ? "binary" : null
+    },
+    function( err, response, body )
+    {
+      if( err )
+      {
+        return callback( err );
+      }
+      else if( response.statusCode !== 200 )
+      {
+        return callback( new Error( uri + " returned http " + response.statusCode ) );
+      }
 
-    request(
-        {
-            uri: uri,
-            encoding: toDataUri ? "binary" : ""
-        },
-        function( err, response, body )
-        {
-            if( err )
-            {
-                return callback( err );
-            }
-            else if( response.statusCode !== 200 )
-            {
-                return callback( new Error( uri + " returned http " + response.statusCode ) );
-            }
-
-            if( toDataUri )
-            {
-                var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
-                var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
-                return callback( null, datauriContent );
-            }
-            else
-            {
-                return callback( null, body );
-            }
-        } );
+      if( toDataUri )
+      {
+        var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
+        var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
+        return callback( null, datauriContent );
+      }
+      else if (response.headers["content-encoding"] == "gzip") {
+        zlib.gunzip(body, function(err, dezipped) {
+          callback(null, dezipped.toString());
+        });
+      }
+      else { 
+        return callback( null, body );
+      }
+    } );
 };
 
 util.getInlineFilePath = function( src, relativeTo )
