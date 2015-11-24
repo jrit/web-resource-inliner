@@ -107,7 +107,12 @@ util.getRemote = function( uri, callback, toDataUri )
       }
       else if (response.headers["content-encoding"] == "gzip") {
         zlib.gunzip(body, function(err, dezipped) {
-          callback(null, dezipped.toString());
+          if (err) {
+            console.warn("Error occurred while fetching: " + err)
+          }
+          else{
+            callback(null, dezipped.toString())
+          }
         });
       }
       else { 
