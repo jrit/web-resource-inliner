@@ -58,7 +58,8 @@ util.getAttrs = function( tagMarkup, settings )
     {
         tag = tag[ 0 ];
         var attrs = tagMarkup
-            .replace( />[\s\S]*<\//, "><\/")
+            .replace( /(<[\s\S]*?(?=\>))([\s\S]*?(?=\<\/))(<\/[\w\W]>)?/gm
+, "$1>$3")
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
             .replace( />?\s?<\/[^>]*>$/, "" )
