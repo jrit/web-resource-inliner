@@ -38,7 +38,7 @@ util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
  */
 util.escapeSpecialChars = function( str )
 {
-    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, "\\$1" );
+    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/gm, "\\$1" );
 };
 
 util.isRemotePath = function( url )

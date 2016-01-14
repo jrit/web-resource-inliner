@@ -76,7 +76,7 @@ module.exports = function( options, callback )
                 }
                 content = "" + content
                 content = content.replace(/<\/script>/gm, "<\\/script>")
-                var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
+                var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content.replace(/\/\*[\s]*--[\s]*>*/gm, "/* - ->") + "\n</style>";
                 var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
                 result = result.replace( re, _.constant( html ) );
                 return callback( null );
