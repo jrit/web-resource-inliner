@@ -37,9 +37,7 @@ module.exports = function( options, callback )
                 return callback( null );
             }
             js = "" + js
-            js = js.replace("</script>", "<\\/script>")
-
-            
+            js = js.replace(/<\/script>/gm, "<\\/script>")
           
             var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + js + "\n</script>";
             var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
@@ -76,6 +74,8 @@ module.exports = function( options, callback )
                 {
                     return callback( err );
                 }
+                content = "" + content
+                content = content.replace(/<\/script>/gm, "<\\/script>")
                 var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
                 var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
                 result = result.replace( re, _.constant( html ) );
