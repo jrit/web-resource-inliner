@@ -43,7 +43,7 @@ util.escapeSpecialChars = function( str )
 
 util.isRemotePath = function( url )
 {
-    return /^'?https?:\/\/|^\/\/|^(?:[a-zA-Z0-9]+\.{1})+[a-zA-Z]+\/{0,1}/.test( url );
+    return /^'?https?:\/\/|^\/\/|^(?:[a-zA-Z0-9-]+\.{1})+[a-zA-Z0-9-]+\/{0,1}/.test( url );
 };
 
 util.isBase64Path = function( url )
@@ -81,9 +81,7 @@ util.getRemote = function( uri, callback, toDataUri )
 {
   if( /^\/\//.test( uri ) )
   {
-    uri = "http:" + uri;
-  } else{
-    uri = "http://" +uri;
+    uri = "https:" + uri;
   }
 
   request(
@@ -137,9 +135,9 @@ util.getInlineFileContents = function( src, relativeTo )
 
 util.getTextReplacement = function( src, relativeTo, callback )
 {
-    if( util.isRemotePath( relativeTo ) &&  !util.isRemotePath(src))
+    if( util.isRemotePath( relativeTo ) )
     {
-        util.getRemote( relativeTo +"/"+ src , callback );
+        util.getRemote( url.resolve( relativeTo, src ), callback );
     }
     else if( util.isRemotePath( src ) )
     {
@@ -163,11 +161,10 @@ util.getFileReplacement = function( src, relativeTo, callback )
 {
     if( util.isRemotePath( relativeTo ) )
     {
-        util.getRemote(  relativeTo+"/"+ src , callback, true );
+        util.getRemote( url.resolve( relativeTo, src ), callback, true );
     }
-    else if( util.isRemotePath( url.resolve( relativeTo, src ) ) )
+    else if( util.isRemotePath( src ) )
     {
-
         util.getRemote( src, callback, true );
     }
     else
