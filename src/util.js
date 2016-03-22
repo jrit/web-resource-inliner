@@ -84,7 +84,8 @@ util.getRemote = function( uri, callback, toDataUri )
     request(
         {
             uri: uri,
-            encoding: toDataUri ? "binary" : ""
+            encoding: toDataUri ? "binary" : "",
+            gzip: true
         },
         function( err, response, body )
         {
