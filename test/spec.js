@@ -57,158 +57,249 @@ function testEquality( err, result, expected, done )
 
 describe( "html", function()
 {
-
-    it( "should inline local links", function( done )
+    describe( "links", function()
     {
-        var expected = readFile( "test/cases/css_out.html" );
+        it( "should inline local links", function( done )
+        {
+            var expected = readFile( "test/cases/css_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/css.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
+            inline.html( {
+                    fileContent: readFile( "test/cases/css.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline remote links", function( done )
+        {
+            var expected = readFile( "test/cases/css-remote_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-remote.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline remote links with no protocol", function( done )
+        {
+            var expected = readFile( "test/cases/css-remote-no-protocol_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-remote-no-protocol.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline remote links relative to a url", function( done )
+        {
+            var expected = readFile( "test/cases/css-remote-relative-to-url_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-remote-relative-to-url.html" ),
+                    relativeTo: "https://raw.githubusercontent.com/jrit/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline local and remote multiline links", function( done )
+        {
+            var expected = readFile( "test/cases/css-multiline_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-multiline.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
-    it( "should inline remote links", function( done )
+    describe( "scripts", function()
     {
-        var expected = readFile( "test/cases/css-remote_out.html" );
+        it( "should inline scripts", function( done )
+        {
+            var expected = readFile( "test/cases/script_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/css-remote.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
+            inline.html( {
+                    fileContent: readFile( "test/cases/script.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline multiline scripts", function( done )
+        {
+            var expected = readFile( "test/cases/script-multiline_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/script-multiline.html" ),
+                    relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
-    it( "should inline remote links with no protocol", function( done )
+    describe( "images", function()
     {
-        var expected = readFile( "test/cases/css-remote-no-protocol_out.html" );
+        it( "should inline local images", function( done )
+        {
+            var expected = readFile( "test/cases/img_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/css-remote-no-protocol.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
+            inline.html( {
+                    fileContent: readFile( "test/cases/img.html" ),
+                    relativeTo: "test/cases/",
+                    images: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline remote images", function( done )
+        {
+            var expected = readFile( "test/cases/img-remote_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/img-remote.html" ),
+                    relativeTo: "test/cases/",
+                    images: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should inline images in one line", function( done )
+        {
+            var expected = readFile( "test/cases/img-singleline_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/img-singleline.html" ),
+                    relativeTo: "test/cases/",
+                    images: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should include based on size", function( done )
+        {
+            var expected = readFile( "test/cases/img-opt-out_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/img-opt-out.html" ),
+                    relativeTo: "test/cases/",
+                    images: 8
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should exclude based on size", function( done )
+        {
+            var expected = readFile( "test/cases/img-too-large_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/img-too-large.html" ),
+                    relativeTo: "test/cases/",
+                    images: 0.1
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
-    it( "should inline remote links relative to a url", function( done )
+    describe( "svgs", function()
     {
-        var expected = readFile( "test/cases/css-remote-relative-to-url_out.html" );
+        it( "should inline local svgs", function( done )
+        {
+            var expected = readFile( "test/cases/svg/svg_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/css-remote-relative-to-url.html" ),
-                relativeTo: "https://raw.githubusercontent.com/jrit/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
+            inline.html( {
+                    fileContent: readFile( "test/cases/svg/svg.html" ),
+                    relativeTo: "test/cases/",
+                    svgs: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
 
-    it( "should inline local and remote multiline links", function( done )
-    {
-        var expected = readFile( "test/cases/css-multiline_out.html" );
+        it( "should include based on size", function( done )
+        {
+            var expected = readFile( "test/cases/svg/svg-opt-out_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/css-multiline.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
+            inline.html( {
+                    fileContent: readFile( "test/cases/svg/svg-opt-out.html" ),
+                    relativeTo: "test/cases/",
+                    svgs: 8
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
 
-    it( "should inline scripts", function( done )
-    {
-        var expected = readFile( "test/cases/script_out.html" );
+        it( "should exclude based on size", function( done )
+        {
+            var expected = readFile( "test/cases/svg/svg-too-large_out.html" );
 
-        inline.html( {
-                fileContent: readFile( "test/cases/script.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should inline multiline scripts", function( done )
-    {
-        var expected = readFile( "test/cases/script-multiline_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/script-multiline.html" ),
-                relativeTo: "test/cases/"
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should inline local images", function( done )
-    {
-        var expected = readFile( "test/cases/img_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/img.html" ),
-                relativeTo: "test/cases/",
-                images: true
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should inline remote images", function( done )
-    {
-        var expected = readFile( "test/cases/img-remote_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/img-remote.html" ),
-                relativeTo: "test/cases/",
-                images: true
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should inline images in one line", function( done )
-    {
-        var expected = readFile( "test/cases/img-singleline_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/img-singleline.html" ),
-                relativeTo: "test/cases/",
-                images: true
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
+            inline.html( {
+                    fileContent: readFile( "test/cases/svg/svg-too-large.html" ),
+                    relativeTo: "test/cases/",
+                    svgs: 0.1
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
     it( "should inline based on inlineAttribute", function( done )
@@ -235,38 +326,6 @@ describe( "html", function()
                 fileContent: readFile( "test/cases/img-opt-out.html" ),
                 relativeTo: "test/cases/",
                 images: true
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should include images based on size", function( done )
-    {
-        var expected = readFile( "test/cases/img-opt-out_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/img-opt-out.html" ),
-                relativeTo: "test/cases/",
-                images: 8
-            },
-            function( err, result )
-            {
-                testEquality( err, result, expected, done );
-            }
-        );
-    } );
-
-    it( "should exclude images based on size", function( done )
-    {
-        var expected = readFile( "test/cases/img-too-large_out.html" );
-
-        inline.html( {
-                fileContent: readFile( "test/cases/img-too-large.html" ),
-                relativeTo: "test/cases/",
-                images: 0.1
             },
             function( err, result )
             {

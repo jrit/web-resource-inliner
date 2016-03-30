@@ -49,6 +49,9 @@ Sets the attribute that is used to include/exclude specific resources based on t
 #### `images`, Boolean or Number, default `8`
 When true, inline images unless they have an exclusion attribute (see inlineAttribute option). When false, exclude images unless they have an inclusion attribute (see inlineAttribute option). When a number, inline images only when the base64 content size is less than the number of KBs. For example, the default is to only inline images less than 8KB.
 
+#### `svgs`, Boolean or Number, default `8`
+When true, inline SVG `<use>` unless they have an exclusion attribute (see inlineAttribute option). When false, exclude SVG `<use>` unless they have an inclusion attribute (see inlineAttribute option). When a number, inline SVG `<use>` only when the content size is less than the number of KBs. For example, the default is to only inline SVGs less than 8KB.
+
 #### `scripts`, Boolean or Number, default `true`
 When true, inline scripts unless they have an exclusion attribute (see inlineAttribute option). When false, exclude scripts unless they have an inclusion attribute (see inlineAttribute option). When a number, inline scripts only when the base64 content size is less than the number of KBs.
 

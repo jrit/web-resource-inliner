@@ -6,7 +6,7 @@
   },
   "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "keywords": [
     "inline",
     "js",
@@ -23,10 +23,10 @@
     "url": "https://github.com/jrit/web-resource-inliner.git"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4.0.0"
   },
   "devDependencies": {
-    "faux-jax": "^4.1.0",
+    "faux-jax": "^5.0.0",
     "istanbul": "^0.3.5",
     "mime-types": "^2.1.7",
     "mocha": "^2.0.1"
@@ -36,6 +36,7 @@
     "clean-css": "1.1.7",
     "cli-color": "^0.3.2",
     "datauri": "~0.2.0",
+    "htmlparser2": "^3.9.0",
     "lodash": "^3.10.1",
     "request": "^2.49.0",
     "uglify-js": "^2.4.1",

@@ -19,7 +19,6 @@
     "disallowTrailingWhitespace": true,
     "requireBlocksOnNewline": true,
     "requireCamelCaseOrUpperCaseIdentifiers": true,
-    "requireCapitalizedComments": { "ignoreIfInTheMiddle": true },
     "requireCommaBeforeLineBreak": true,
     "requireCurlyBraces": true,
     "requireDotNotation": true,
@@ -43,7 +42,6 @@
     "requireSpacesInsideObjectBrackets": "all",
     "requireSpacesInsideParentheses": "all",
     "validateIndentation": 4,
-    "validateLineBreaks": "LF",
     "validateQuoteMarks": {
         "escape": true,
         "mark": "\""

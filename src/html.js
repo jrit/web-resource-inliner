@@ -7,6 +7,7 @@ var xtend = require( "xtend" );
 var async = require( "async" );
 var inline = require( "./util" );
 var css = require( "./css" );
+var htmlparser = require( "htmlparser2" );
 
 module.exports = function( options, callback )
 {
@@ -102,6 +103,46 @@ module.exports = function( options, callback )
         } );
     };
 
+    var replaceSvg = function( callback )
+    {
+        var args = this;
+
+        args.element = replaceInlineAttribute( args.element );
+
+        inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
+        {
+            if( err )
+            {
+                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
+            }
+            if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+            {
+                return callback( null );
+            }
+
+            var handler = new htmlparser.DomHandler( function( err, dom )
+            {
+                if( err )
+                {
+                    return callback( err );
+                }
+
+                var svg = htmlparser.DomUtils.getElements( { id: args.id }, dom );
+                if( svg.length )
+                {
+                    var use = htmlparser.DomUtils.getInnerHTML( svg[ 0 ] );
+                    var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+                    result = result.replace( re, _.constant( use ) );
+                }
+
+                return callback( null );
+            },{ normalizeWhitespace: true } );
+            var parser = new htmlparser.Parser( handler, { xmlMode: true } );
+            parser.write( content );
+            parser.done();
+        } );
+    };
+
     var result = settings.fileContent;
     var tasks = [];
     var found;
@@ -153,6 +194,23 @@ module.exports = function( options, callback )
                 src: _.unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.images
+            } ) );
+        }
+    }
+
+    var svgRegex = /<use\b[\s\S]+?\bxlink:href\s*=\s*("|')([\s\S]+?)#([^"'\s]*)("|')\s*\/?>(<\/\s*use>)?/gi;
+    while( ( found = svgRegex.exec( result ) ) !== null )
+    {
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            ( settings.svgs || inlineAttributeRegex.test( found[ 0 ] ) ) )
+        {
+            tasks.push( replaceSvg.bind(
+            {
+                element: found[ 0 ],
+                src: _.unescape( found[ 2 ] ).trim(),
+                attrs: inline.getAttrs( found[ 0 ], settings ),
+                limit: settings.svgs,
+                id: _.unescape( found[ 3 ] ).trim()
             } ) );
         }
     }

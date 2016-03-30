@@ -13,6 +13,7 @@ module.exports = util;
 
 util.defaults = {
     images: 8,
+    svgs: 8,
     scripts: true,
     links: true,
     uglify: false,
