@@ -485,7 +485,8 @@ describe( "html", function()
             } );
         } );
 
-        it( "should apply the requestTransform option", function( done ) {
+        it( "should apply the requestTransform option", function( done )
+        {
             fauxJax.on( "request", function( request )
             {
                 assert( request.requestURL.indexOf( "foo=bar" ) !== -1 );
@@ -496,7 +497,7 @@ describe( "html", function()
                 scripts: true,
                 links: true,
                 images: true,
-                requestTransform: function(options)
+                requestTransform: function( options )
                 {
                     options.qs = {
                         foo: "bar"
@@ -504,7 +505,6 @@ describe( "html", function()
                 }
             }, done );
         } );
-
     } );
 } );
 

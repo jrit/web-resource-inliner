@@ -33,7 +33,7 @@ module.exports = function( options, callback )
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
             var js = options.uglify ? UglifyJS.minify( content ).code : content;
-            if( typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
+            if( !content || typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
             {
                 return callback( null );
             }
@@ -56,7 +56,7 @@ module.exports = function( options, callback )
             {
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
-            if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+            if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
             {
                 return callback( null );
             }
@@ -92,7 +92,7 @@ module.exports = function( options, callback )
             {
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
-            if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
+            if( !datauriContent || typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
             {
                 return callback( null );
             }
@@ -109,13 +109,13 @@ module.exports = function( options, callback )
 
         args.element = replaceInlineAttribute( args.element );
 
-        inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
+        inline.getTextReplacement( args.src, settings, function( err, content )
         {
             if( err )
             {
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
-            if( typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+            if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
             {
                 return callback( null );
             }

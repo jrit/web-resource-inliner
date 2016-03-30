@@ -90,7 +90,16 @@ function getRemote( uri, settings, callback, toDataUri )
 
     if( typeof settings.requestTransform === "function" )
     {
-        requestOptions = settings.requestTransform( requestOptions ) || requestOptions;
+        var transformedOptions = settings.requestTransform( requestOptions );
+        if( transformedOptions === false )
+        {
+            return callback();
+        }
+        if( transformedOptions === undefined )
+        {
+            return callback( new Error( uri + " requestTransform returned `undfined`" ) );
+        }
+        requestOptions = transformedOptions || requestOptions;
     }
 
     request(
