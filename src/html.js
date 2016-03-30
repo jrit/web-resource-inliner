@@ -26,7 +26,7 @@ module.exports = function( options, callback )
 
         args.element = replaceInlineAttribute( args.element );
 
-        inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
+        inline.getTextReplacement( args.src, settings, function( err, content )
         {
             if( err )
             {
@@ -50,7 +50,7 @@ module.exports = function( options, callback )
 
         args.element = replaceInlineAttribute( args.element );
 
-        inline.getTextReplacement( args.src, settings.relativeTo, function( err, content )
+        inline.getTextReplacement( args.src, settings, function( err, content )
         {
             if( err )
             {
@@ -86,7 +86,7 @@ module.exports = function( options, callback )
 
         args.element = replaceInlineAttribute( args.element );
 
-        inline.getFileReplacement( args.src, settings.relativeTo, function( err, datauriContent )
+        inline.getFileReplacement( args.src, settings, function( err, datauriContent )
         {
             if( err )
             {
