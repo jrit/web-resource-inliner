@@ -54,12 +54,17 @@ module.exports = function( options, callback )
 
     if( settings.rebaseRelativeTo )
     {
+        var matches = {};
         while( ( found = urlRegex.exec( result ) ) !== null )
         {
             var src = found[ 1 ];
+            matches[src] = src;
+        }
+        for (var src in matches)
+        {
             if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
             {
-                rebase( src );
+               rebase( src );
             }
         }
     }
