@@ -58,13 +58,14 @@ module.exports = function( options, callback )
         while( ( found = urlRegex.exec( result ) ) !== null )
         {
             var src = found[ 1 ];
-            matches[src] = src;
+            matches[ src ] = true;
         }
-        for (var src in matches)
+
+        for( var src in matches )
         {
             if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
             {
-               rebase( src );
+                rebase( src );
             }
         }
     }
