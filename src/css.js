@@ -4,7 +4,7 @@ var CleanCSS = require( "clean-css" );
 var xtend = require( "xtend" );
 var async = require( "async" );
 var path = require( "path" );
-var _ = require( "lodash" );
+var constant = require( "lodash.constant" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
@@ -33,7 +33,7 @@ module.exports = function( options, callback )
 
             var css = "url(\"" + datauriContent + "\");";
             var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\);", "g" );
-            result = result.replace( re, _.constant( css ) );
+            result = result.replace( re, constant( css ) );
 
             return callback( null );
         } );
@@ -43,7 +43,7 @@ module.exports = function( options, callback )
     {
         var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\");";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\);", "g" );
-        result = result.replace( re, _.constant( css ) );
+        result = result.replace( re, constant( css ) );
     };
 
     var result = settings.fileContent;

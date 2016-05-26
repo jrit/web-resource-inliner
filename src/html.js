@@ -1,8 +1,8 @@
 "use strict";
 
 var path = require( "path" );
-var UglifyJS = require( "uglify-js" );
-var _ = require( "lodash" );
+var constant = require( "lodash.constant" );
+var unescape = require( "lodash.unescape" );
 var xtend = require( "xtend" );
 var async = require( "async" );
 var inline = require( "./util" );
@@ -32,15 +32,29 @@ module.exports = function( options, callback )
             {
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
-            var js = options.uglify ? UglifyJS.minify( content ).code : content;
-            if( !content || typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
+
+            var onTransform = function( err, content )
             {
+                if( err )
+                {
+                    return callback( err );
+                }
+
+                if( !content || typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
+                {
+                    return callback( null );
+                }
+                var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</script>";
+                var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+                result = result.replace( re, constant( html ) );
                 return callback( null );
+            };
+
+            if( options.scriptTransform )
+            {
+                return options.scriptTransform( content, onTransform );
             }
-            var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + js + "\n</script>";
-            var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-            result = result.replace( re, _.constant( html ) );
-            return callback( null );
+            onTransform( null, content );
         } );
     };
 
@@ -56,27 +70,42 @@ module.exports = function( options, callback )
             {
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
-            if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
-            {
-                return callback( null );
-            }
 
-            var cssOptions = xtend( {}, settings, {
-                fileContent: content.toString(),
-                rebaseRelativeTo: path.relative( settings.relativeTo, path.join( settings.relativeTo, args.src, ".." + path.sep ) )
-            } );
-
-            css( cssOptions, function( err, content )
+            var onTransform = function( err, content )
             {
                 if( err )
                 {
                     return callback( err );
                 }
-                var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
-                var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-                result = result.replace( re, _.constant( html ) );
-                return callback( null );
-            } );
+
+                if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+                {
+                    return callback( null );
+                }
+
+                var cssOptions = xtend( {}, settings, {
+                    fileContent: content.toString(),
+                    rebaseRelativeTo: path.relative( settings.relativeTo, path.join( settings.relativeTo, args.src, ".." + path.sep ) )
+                } );
+
+                css( cssOptions, function( err, content )
+                {
+                    if( err )
+                    {
+                        return callback( err );
+                    }
+                    var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
+                    var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+                    result = result.replace( re, constant( html ) );
+                    return callback( null );
+                } );
+            };
+
+            if( options.linkTransform )
+            {
+                return options.linkTransform( content, onTransform );
+            }
+            onTransform( null, content );
         } );
     };
 
@@ -98,7 +127,7 @@ module.exports = function( options, callback )
             }
             var html = "<img" + ( args.attrs ? " " + args.attrs : "" ) + " src=\"" + datauriContent + "\" />";
             var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-            result = result.replace( re, _.constant( html ) );
+            result = result.replace( re, constant( html ) );
             return callback( null );
         } );
     };
@@ -132,7 +161,7 @@ module.exports = function( options, callback )
                 {
                     var use = htmlparser.DomUtils.getInnerHTML( svg[ 0 ] );
                     var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-                    result = result.replace( re, _.constant( use ) );
+                    result = result.replace( re, constant( use ) );
                 }
 
                 return callback( null );
@@ -159,7 +188,7 @@ module.exports = function( options, callback )
             tasks.push( replaceScript.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape( found[ 2 ] ).trim(),
+                src: unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.scripts
             } ) );
@@ -175,7 +204,7 @@ module.exports = function( options, callback )
             tasks.push( replaceLink.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape( found[ 2 ] ).trim(),
+                src: unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.links
             } ) );
@@ -191,7 +220,7 @@ module.exports = function( options, callback )
             tasks.push( replaceImg.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape( found[ 2 ] ).trim(),
+                src: unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.images
             } ) );
@@ -207,10 +236,10 @@ module.exports = function( options, callback )
             tasks.push( replaceSvg.bind(
             {
                 element: found[ 0 ],
-                src: _.unescape( found[ 2 ] ).trim(),
+                src: unescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.svgs,
-                id: _.unescape( found[ 3 ] ).trim()
+                id: unescape( found[ 3 ] ).trim()
             } ) );
         }
     }

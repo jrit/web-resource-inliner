@@ -133,6 +133,25 @@ describe( "html", function()
                 }
             );
         } );
+
+        it( "should transform links", function( done )
+        {
+            var expected = readFile( "test/cases/css-transform_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-transform.html" ),
+                    relativeTo: "test/cases/",
+                    linkTransform: function( content, done )
+                    {
+                        done( null, "/*inserted*/\n" + content );
+                    }
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
     describe( "scripts", function()
@@ -159,6 +178,25 @@ describe( "html", function()
             inline.html( {
                     fileContent: readFile( "test/cases/script-multiline.html" ),
                     relativeTo: "test/cases/"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
+        it( "should transform scripts", function( done )
+        {
+            var expected = readFile( "test/cases/script-transform_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/script-transform.html" ),
+                    relativeTo: "test/cases/",
+                    scriptTransform: function( content, done )
+                    {
+                        done( null, "/*inserted*/\n" + content );
+                    }
                 },
                 function( err, result )
                 {

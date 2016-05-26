@@ -5,7 +5,7 @@ var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
-var clc = require( "cli-color" );
+var chalk = require( "chalk" );
 
 var util = {};
 
@@ -16,13 +16,15 @@ util.defaults = {
     svgs: 8,
     scripts: true,
     links: true,
-    uglify: false,
     cssmin: false,
     strict: false,
     relativeTo: "",
     rebaseRelativeTo: "",
     inlineAttribute: "data-inline",
-    fileContent: ""
+    fileContent: "",
+    requestTransform: undefined,
+    scriptTransform: undefined,
+    linkTransform: undefined
 };
 
 util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
@@ -97,7 +99,7 @@ function getRemote( uri, settings, callback, toDataUri )
         }
         if( transformedOptions === undefined )
         {
-            return callback( new Error( uri + " requestTransform returned `undfined`" ) );
+            return callback( new Error( uri + " requestTransform returned `undefined`" ) );
         }
         requestOptions = transformedOptions || requestOptions;
     }
@@ -188,7 +190,7 @@ util.handleReplaceErr = function( err, src, strict, callback )
     }
     else
     {
-        console.warn( clc.yellow( "Not found, skipping: " + src ) );
+        console.warn( chalk.yellow( "Not found, skipping: " + src ) );
         return callback( null );
     }
 };
