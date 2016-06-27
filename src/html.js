@@ -41,7 +41,7 @@ module.exports = function( options, callback )
                     return callback( err );
                 }
 
-                if( !content || typeof( args.limit ) === "number" && js.length > args.limit * 1000 )
+                if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
                 {
                     return callback( null );
                 }
