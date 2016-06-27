@@ -3,15 +3,16 @@
 var path = require( "path" );
 var constant = require( "lodash.constant" );
 var unescape = require( "lodash.unescape" );
-var xtend = require( "xtend" );
 var async = require( "async" );
+
+var extend = require( "./util/extend" );
 var inline = require( "./util" );
 var css = require( "./css" );
 var htmlparser = require( "htmlparser2" );
 
 module.exports = function( options, callback )
 {
-    var settings = xtend( {}, inline.defaults, options );
+    var settings = extend( require( "./defaults" )(), options );
 
     function replaceInlineAttribute( string )
     {
@@ -83,7 +84,7 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
-                var cssOptions = xtend( {}, settings, {
+                var cssOptions = extend( settings, {
                     fileContent: content.toString(),
                     rebaseRelativeTo: path.relative( settings.relativeTo, path.join( settings.relativeTo, args.src, ".." + path.sep ) )
                 } );

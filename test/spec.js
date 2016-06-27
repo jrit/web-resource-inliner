@@ -20,7 +20,7 @@ function readFile( file )
 
 function diff( actual, expected )
 {
-    if( actual === expected )
+    if( !actual || !expected || ( actual === expected ) )
     {
         return;
     }

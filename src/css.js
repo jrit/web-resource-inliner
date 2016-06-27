@@ -1,97 +1,97 @@
 "use strict";
 
 var CleanCSS = require( "clean-css" );
-var xtend = require( "xtend" );
-var async = require( "async" );
 var path = require( "path" );
-var constant = require( "lodash.constant" );
+
 var inline = require( "./util" );
+var extend = require( "./util/extend" );
+var isFunction = require( "./util/isFunction" );
 
 module.exports = function( options, callback )
 {
-    var settings = xtend( {}, inline.defaults, options );
+    options = extend( require( "./defaults" )(), options );
 
-    var replaceUrl = function( callback )
-    {
-        var args = this;
+    function replace( search, replace ) {
+        var re = new RegExp( "url\\(\\s?[\"']?(" +
+            inline.escapeSpecialChars( search ) +
+            ")[\"']?\\s?\\);([^\{\:]*)", "gi" );
 
-        if( inline.isBase64Path( args.src ) )
-        {
-            return callback( null ); // Skip
-        }
-
-        inline.getFileReplacement( args.src, settings, function( err, datauriContent )
-        {
-            if( err )
-            {
-                return inline.handleReplaceErr( err, args.src, settings.strict, callback );
-            }
-            if( typeof( args.limit ) === "number" && datauriContent.length > args.limit * 1000 )
-            {
-                return callback( null ); // Skip
+        options.fileContent = options.fileContent.replace( re, function( origin, p1, p2 ) {
+            if ( ( !options.images && p2.indexOf( options.inlineAttribute + " " ) !== -1 ) ||
+                ( options.images && p2.indexOf( options.inlineAttribute + "-ignore " ) === -1 ) ) {
+                return "url(\"" + replace + "\");" + p2;
             }
 
-            var css = "url(\"" + datauriContent + "\");";
-            var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\);", "g" );
-            result = result.replace( re, constant( css ) );
-
-            return callback( null );
+            return "url(\"" + p1 + "\");" + p2;
         } );
-    };
 
-    var rebase = function( src )
-    {
-        var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\");";
-        var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\);", "g" );
-        result = result.replace( re, constant( css ) );
-    };
-
-    var result = settings.fileContent;
-    var tasks = [];
-    var found = null;
-
-    var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
-
-    if( settings.rebaseRelativeTo )
-    {
-        var matches = {};
-        while( ( found = urlRegex.exec( result ) ) !== null )
-        {
-            var src = found[ 1 ];
-            matches[ src ] = true;
-        }
-
-        for( var src in matches )
-        {
-            if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
-            {
-                rebase( src );
-            }
-        }
+        return replace;
     }
 
-    var inlineAttributeCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s?\\*\\/", "i" );
-    var inlineAttributeIgnoreCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "i" );
+    function search( re ) {
+        var result = [],
+            matches;
 
-    while( ( found = urlRegex.exec( result ) ) !== null )
-    {
-        if( !inlineAttributeIgnoreCommentRegex.test( found[ 0 ] ) &&
-            ( settings.images || inlineAttributeCommentRegex.test( found[ 0 ] ) ) )
-        {
-            tasks.push( replaceUrl.bind(
-            {
-                src: found[ 1 ],
-                limit: settings.images
+        while( ( matches = re.exec( options.fileContent ) ) !== null ) {
+            result.push( matches.map( function( item ) {
+                return item;
             } ) );
         }
+
+        return result;
     }
 
-    async.parallel( tasks, function( err )
-    {
-        if( !err )
-        {
-            result = settings.cssmin ? CleanCSS.process( result ) : result;
+    return new Promise( function( resolve ) {
+        var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);/gi;
+
+        resolve( search( urlRegex ).reduce( function( result, src ) {
+            result[ src[1] ] = true;
+            return result;
+        }, {} ) );
+    } ).then( function( matches ) {
+        return Promise.all( Object.keys( matches ).map( function( src ) {
+            return new Promise( function( resolve, reject ) {
+                if ( inline.isBase64Path( src ) ) {
+                    return resolve( src ); // Skip
+                }
+
+                // Rebase source
+                if ( !inline.isRemotePath( src ) && options.rebaseRelativeTo ) {
+                    src = replace( src, path.join( options.rebaseRelativeTo, src ).replace( /\\/g, "/" ) );
+                }
+
+                // Replace source
+                return inline.getFileReplacement( src, options, function( err, content ) {
+                    if ( err ) {
+                        if ( options.strict ) {
+                            return reject( err );
+                        } else {
+                            console.warn( "Not found, skipping: " + src  );
+                            return resolve( src ); // Skip
+                        }
+                    }
+
+                    if ( typeof( options.images ) === "number" &&
+                        content.length > options.images * 1000 ) {
+                        return resolve( src ); // Skip
+                    }
+
+                    src = replace( src, content );
+
+                    return resolve( src );
+                } );
+            } );
+        } ) );
+    } ).then( function() {
+        options.fileContent = options.cssmin ? CleanCSS.process( options.fileContent ) : options.fileContent;
+        if ( isFunction( callback ) ) {
+            callback( null, options.fileContent );
         }
-        callback( err, result );
+        return options.fileContent;
+    } ).catch( function( err ) {
+        if ( isFunction( callback ) ) {
+            callback( err );
+        }
+        return Promise.reject( err );
     } );
 };
