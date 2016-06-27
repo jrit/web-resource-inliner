@@ -12,7 +12,7 @@ var htmlparser = require( "htmlparser2" );
 
 module.exports = function( options, callback )
 {
-    var settings = extend( require( "./defaults" )(), options );
+    var settings = require( "./options" )( options );
 
     function replaceInlineAttribute( string )
     {

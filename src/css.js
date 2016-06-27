@@ -4,12 +4,11 @@ var CleanCSS = require( "clean-css" );
 var path = require( "path" );
 
 var inline = require( "./util" );
-var extend = require( "./util/extend" );
 var isFunction = require( "./util/isFunction" );
 
 module.exports = function( options, callback )
 {
-    options = extend( require( "./defaults" )(), options );
+    options = require( "./options" )( options );
 
     function replace( search, replace ) {
         var re = new RegExp( "url\\(\\s?[\"']?(" +

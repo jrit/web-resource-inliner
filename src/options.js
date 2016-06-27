@@ -1,5 +1,7 @@
-module.exports = function () {
-    return {
+var extend = require( "./util/extend" );
+
+module.exports = function ( options ) {
+    return extend( {
         images: 8,
         svgs: 8,
         scripts: true,
@@ -13,5 +15,5 @@ module.exports = function () {
         requestTransform: undefined,
         scriptTransform: undefined,
         linkTransform: undefined
-    };
+    }, options );
 };
