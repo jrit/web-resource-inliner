@@ -3,10 +3,11 @@
 var assert = require( "assert" );
 var fs = require( "fs" );
 var path = require( "path" );
-var inline = require( "../src/inline.js" );
-var util = require( "../src/util.js" );
 var fauxJax = require( "faux-jax" );
 var mime = require( "mime-types" );
+
+var inline = require( "../src/inline.js" );
+var escapeSpecialChars = require( "../src/util/escapeSpecialChars" );
 
 function normalize( contents )
 {
@@ -592,7 +593,7 @@ describe( "util", function()
             var str = "http://fonts.googleapis.com/css?family=Open+Sans";
             var expected = "http:\\/\\/fonts\\.googleapis\\.com\\/css\\?family=Open\\+Sans";
 
-            var result = util.escapeSpecialChars( str );
+            var result = escapeSpecialChars( str );
             var regex = new RegExp( result, "g" );
 
             assert.equal( result, expected );

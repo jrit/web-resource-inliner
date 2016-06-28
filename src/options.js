@@ -1,6 +1,15 @@
 var extend = require( "./util/extend" );
 
+function resolveContent( content ) {
+    if ( content instanceof Buffer ) {
+        return content.toString();
+    }
+    return content;
+}
+
 module.exports = function ( options ) {
+    options.fileContent = resolveContent( options.fileContent );
+
     return extend( {
         images: 8,
         svgs: 8,

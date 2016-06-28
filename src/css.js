@@ -3,8 +3,12 @@
 var CleanCSS = require( "clean-css" );
 var path = require( "path" );
 
-var inline = require( "./util" );
+var search = require( "./util/search" );
 var isFunction = require( "./util/isFunction" );
+var isBase64Path = require( "./util/isBase64Path" );
+var isRemotePath = require( "./util/isRemotePath" );
+var escapeSpecialChars = require( "./util/escapeSpecialChars" );
+var getFileReplacement = require( "./util/getFileReplacement" );
 
 module.exports = function( options, callback )
 {
@@ -12,7 +16,7 @@ module.exports = function( options, callback )
 
     function replace( search, replace ) {
         var re = new RegExp( "url\\(\\s?[\"']?(" +
-            inline.escapeSpecialChars( search ) +
+            escapeSpecialChars( search ) +
             ")[\"']?\\s?\\);([^\{\:]*)", "gi" );
 
         options.fileContent = options.fileContent.replace( re, function( origin, p1, p2 ) {
@@ -27,58 +31,52 @@ module.exports = function( options, callback )
         return replace;
     }
 
-    function search( re ) {
-        var result = [],
-            matches;
-
-        while( ( matches = re.exec( options.fileContent ) ) !== null ) {
-            result.push( matches.map( function( item ) {
-                return item;
-            } ) );
+    return new Promise( function( resolve, reject ) {
+        if ( !options.fileContent ) {
+            return reject( new Error( "No file content" ) );
         }
 
-        return result;
-    }
-
-    return new Promise( function( resolve ) {
-        var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);/gi;
-
-        resolve( search( urlRegex ).reduce( function( result, src ) {
-            result[ src[1] ] = true;
+        return resolve( search(
+            /url\(\s?["']?([^)'"]+)["']?\s?\);/gi,
+            options.fileContent
+        ).reduce( function( result, src ) {
+            if ( !result[ src[1] ] ) {
+                result[ src[1] ] = [ src[0] ];
+            } else {
+                result[ src[1] ].push( src[0] );
+            }
             return result;
         }, {} ) );
     } ).then( function( matches ) {
         return Promise.all( Object.keys( matches ).map( function( src ) {
-            return new Promise( function( resolve, reject ) {
-                if ( inline.isBase64Path( src ) ) {
-                    return resolve( src ); // Skip
-                }
+            if ( isBase64Path( src ) ) {
+                return Promise.resolve(); // Skip
+            }
 
-                // Rebase source
-                if ( !inline.isRemotePath( src ) && options.rebaseRelativeTo ) {
-                    src = replace( src, path.join( options.rebaseRelativeTo, src ).replace( /\\/g, "/" ) );
+            return new Promise( function( resolve, reject ) {
+                var origin = src;
+                if ( !isRemotePath( src ) && options.rebaseRelativeTo ) {
+                    origin = path.join( options.rebaseRelativeTo, src ).replace( /\\/g, "/" );
                 }
 
                 // Replace source
-                return inline.getFileReplacement( src, options, function( err, content ) {
+                return getFileReplacement( origin, options, function( err, content ) {
                     if ( err ) {
                         if ( options.strict ) {
                             return reject( err );
                         } else {
                             console.warn( "Not found, skipping: " + src  );
-                            return resolve( src ); // Skip
+                            return resolve(); // Skip
                         }
                     }
-
-                    if ( typeof( options.images ) === "number" &&
-                        content.length > options.images * 1000 ) {
-                        return resolve( src ); // Skip
-                    }
-
-                    src = replace( src, content );
-
-                    return resolve( src );
+                    resolve( content );
                 } );
+            } ).then( function( content ) {
+                if ( !content || typeof( options.images ) === "number" &&
+                    content.length > options.images * 1000 ) {
+                    return; // Skip
+                }
+                return replace( src, content );
             } );
         } ) );
     } ).then( function() {
@@ -88,6 +86,7 @@ module.exports = function( options, callback )
         }
         return options.fileContent;
     } ).catch( function( err ) {
+        console.log( err ); //#Debug
         if ( isFunction( callback ) ) {
             callback( err );
         }
