@@ -1,8 +1,9 @@
 var url = require( "url" );
+var fs = require( "fs" );
 
 var getRemote = require( "./getRemote" );
 var isRemotePath = require( "./isRemotePath" );
-var getInlineFileContents = require( "./getInlineFileContents" );
+var getInlineFilePath = require( "./getInlineFilePath" );
 
 module.exports = function( src, settings, callback )
 {
@@ -16,14 +17,6 @@ module.exports = function( src, settings, callback )
     }
     else
     {
-        try
-        {
-            var replacement = getInlineFileContents( src, settings.relativeTo );
-        }
-        catch( err )
-        {
-            return callback( err );
-        }
-        return callback( null, replacement );
+        return fs.readFile( getInlineFilePath( src, settings.relativeTo ), callback );
     }
 };
