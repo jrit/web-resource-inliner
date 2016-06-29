@@ -15,35 +15,105 @@ var isFunction = require( "./util/isFunction" );
 module.exports = function( options, callback )
 {
     options = require( "./options" )( options );
+    var sourceAttributes = [ "src", "href", "srcset", "xlink:href" ];
 
-    function replaceContent( elem ) {
-        var replacer = ( function() {
-            if ( [ "script", "link", "use" ].indexOf( elem.name ) !== -1 ) {
-                return getTextReplacement;
-            } else {
-                return getFileReplacement;
-            }
-        } )();
+    function getContentLimit( el ) {
+        switch ( el.name ) {
+            case "img":
+                return options.images;
+            case "use":
+                return options.svgs;
+            case "link":
+                return options.links;
+            case "script":
+                return options.scripts;
+        }
+    }
 
-        var limit = ( function(){
-            switch ( elem.name ) {
-                case "img":
-                    return options.images;
-                case "use":
-                    return options.svgs;
-                case "link":
-                    return options.links;
-                case "script":
-                    return options.scripts;
-            }
-        } )();
+    function validateAttribute( el, attr ) {
+        var src = el.attribs[ attr ];
 
         function inlineAttributeCheck() {
             function isset( obj ) { return obj !== undefined; }
 
-            return ( !isset( elem.attribs[options.inlineAttribute + "-ignore"] ) &&
-                limit || isset( elem.attribs[options.inlineAttribute] ) );
+            return ( !isset( el.attribs[options.inlineAttribute + "-ignore"] ) &&
+                getContentLimit( el ) || isset( el.attribs[options.inlineAttribute] ) );
         }
+
+        if ( !src ||
+            !inlineAttributeCheck() ||
+            isBase64Path( src ) ) {
+            return false; // Skip
+        }
+
+        return true;
+    }
+
+    function getElementSources( el ) {
+        return sourceAttributes.reduce( function( result, attr ) {
+            if ( !validateAttribute( el, attr ) ) {
+                return result; // Skip
+            }
+
+            return result.concat( [
+                el.attribs[ attr ],
+                ( el.name === "use" ? "svg" : el.name ),
+                getContentLimit( el )
+            ] );
+        }, [] );
+    }
+
+    function resolveSource( src, type, limit ) {
+
+        var replacer = ( function() {
+            if ( [ "img" ].indexOf( type ) !== -1 ) {
+                return getFileReplacement;
+            } else {
+                return getTextReplacement;
+            }
+        } )();
+
+        return new Promise( function( resolve, reject ) {
+            return replacer( src.split( "#" )[0], options, function( err, content ) {
+                if ( err ) {
+                    if ( options.strict ) {
+                        return reject( err );
+                    } else {
+                        console.warn( "Not found, skipping: " + src  );
+                        return resolve(); // Skip
+                    }
+                }
+                return resolve( content );
+            } );
+        } ).then( function( content ) {
+            if ( !content ) {
+                return;  // Skip
+            }
+
+            // Handle transformations
+            if ( !options[ type+"Transform" ] ) {
+                return content; // Skip
+            }
+
+            return new Promise( function( resolve, reject ) {
+                options[ type+"Transform" ]( content, function( err, content ) {
+                    if ( err ) {
+                        return reject( err );
+                    }
+                    return resolve( content );
+                } );
+            } );
+        } ).then( function( content ) {
+            if ( !content || typeof( limit ) === "number" &&
+                content.length > limit * 1000 ) {
+                return; // Skip
+            }
+
+            return [ src, content ];
+        } );
+    }
+
+    function replaceContent( el, attr, content ) {
 
         function createTextChild( content ) {
             return [ {
@@ -58,91 +128,57 @@ module.exports = function( options, callback )
             } ];
         }
 
-        return Promise.all( [ "src", "href", "srcset", "xlink:href" ].map( function( src ) {
-            if ( !elem.attribs[src] ||
-                !inlineAttributeCheck() ||
-                isBase64Path( elem.attribs[src] ) ) {
-                return Promise.resolve(); // Skip
-            }
+        // Replace content and/or elent
+        if ( el.name === "img" ) {
+            return el.attribs[ attr ] = content;
+        }
 
-            return new Promise( function( resolve, reject ) {
-                // Retrive source content
-                return replacer( elem.attribs[ src ].split( "#" )[0], options, function( err, content ) {
-                    if ( err ) {
-                        if ( options.strict ) {
-                            return reject( err );
-                        } else {
-                            console.warn( "Not found, skipping: " + elem.attribs[ src ]  );
-                            return resolve(); // Skip
-                        }
+        if ( el.name === "link" ) {
+            // Inline images for each source in the CSS
+            return css( extend( options, {
+                fileContent: content,
+                rebaseRelativeTo: path.relative( options.relativeTo,
+                    path.join( options.relativeTo, el.attribs[ attr ], ".." + path.sep ) )
+            } ) ).then( function( content ) {
+                // Convert to style elent
+                el.type = "style";
+                el.name = "style";
+                el.attribs = { type: "text/css" };
+                return el.children = createTextChild( content );
+            } );
+        }
+
+        if ( el.name === "script" ) {
+            el.type = "script";
+            el.attribs = { type: "text/javascript" };
+            return el.children = createTextChild( content );
+        }
+
+        if ( el.name === "use" &&
+            el.attribs[ attr ].split( "#" ).length === 2 ) {
+            return svg(
+                content,
+                el.attribs[ attr ].split( "#" )[1]
+            ).then( function( svgelent ) {
+                el.attribs = {};
+                for ( var prop in svgelent ) {
+                    if ( {}.hasOwnProperty.call( svgelent, prop ) ) {
+                        el[prop] = svgelent[prop];
                     }
-                    return resolve( content );
-                } );
-            } ).then( function( content ) {
-                if ( !content ) {
-                    return;  // Skip
-                }
-
-                // Handle transformations
-                if ( !options[elem.name+"Transform"] ) {
-                    return Promise.resolve( content ); // Skip
-                }
-
-                return new Promise( function( resolve, reject ) {
-                    options[elem.name+"Transform"]( content, function( err, content ) {
-                        if ( err ) {
-                            return reject( err );
-                        }
-                        return resolve( content );
-                    } );
-                } );
-            } ).then( function( content ) {
-                if ( !content || typeof( limit ) === "number" &&
-                    content.length > limit * 1000 ) {
-                    return; // Skip
-                }
-
-                // Replace content and/or element
-                if ( elem.name === "img" ) {
-                    return elem.attribs[ src ] = content;
-                }
-
-                if ( elem.name === "link" ) {
-                    // Inline images for each source in the CSS
-                    return css( extend( options, {
-                        fileContent: content,
-                        rebaseRelativeTo: path.relative( options.relativeTo,
-                            path.join( options.relativeTo, elem.attribs[ src ], ".." + path.sep ) )
-                    } ) ).then( function( content ) {
-                        // Convert to style element
-                        elem.type = "style";
-                        elem.name = "style";
-                        elem.attribs = { type: "text/css" };
-                        return elem.children = createTextChild( content );
-                    } );
-                }
-
-                if ( elem.name === "script" ) {
-                    elem.type = "script";
-                    elem.attribs = { type: "text/javascript" };
-                    return elem.children = createTextChild( content );
-                }
-
-                if ( elem.name === "use" &&
-                    elem.attribs[ src ].split( "#" ).length === 2 ) {
-                    return svg(
-                        content,
-                        elem.attribs[ src ].split( "#" )[1]
-                    ).then( function( svgElement ) {
-                        elem.attribs = {};
-                        for ( var prop in svgElement ) {
-                            if ( {}.hasOwnProperty.call( svgElement, prop ) ) {
-                                elem[prop] = svgElement[prop];
-                            }
-                        }
-                    } );
                 }
             } );
+        }
+    }
+
+    function resolveElements( elements, source ) {
+        return Promise.all( elements.map( function( el ) {
+            return Promise.all( sourceAttributes.map( function( attr ) {
+                if ( el.attribs[ attr ] === source[0] &&
+                    validateAttribute( el, attr ) ) {
+                    return replaceContent( el, attr, source[1] );
+                }
+                return;
+            } ) );
         } ) );
     }
 
@@ -161,19 +197,38 @@ module.exports = function( options, callback )
         parser.end();
 
     } ).then( function( dom ) {
-        return Promise.all( [
-            "script",
-            "link",
-            "img",
-            "use"
+        var elements = [
+            "script", "link", "img", "use"
         ].reduce( function( result, type ) {
             return result.concat(
-                htmlparser.DomUtils.getElementsByTagName( type, dom )
-            );
-        }, [] ).map( replaceContent ) ).then( function() {
+                htmlparser.DomUtils.getElementsByTagName( type, dom ) );
+        }, [] );
+
+        // Gather and flatten sources
+        var sources = elements.map( getElementSources )
+        .reduce( function( result, source ) {
+            result[source[0]] = source;
+            return result;
+        }, {} );
+
+        return Promise.all( Object.keys( sources ).map( function( src ) {
+            if ( !sources[src].length ) {
+                return;
+            }
+
+            return resolveSource.apply( this, sources[src] )
+            .then( function( source ) {
+                if ( !source || source.length != 2 ) {
+                    return;
+                }
+
+                return resolveElements( elements, source );
+            } );
+        } ) ).then( function() {
             // Re-construct HTML
             return htmlparser.DomUtils.getOuterHTML( dom );
         } );
+
     } ).then( function( result ) {
         if ( isFunction( callback ) ) {
             callback( null, result );

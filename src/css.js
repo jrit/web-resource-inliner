@@ -86,7 +86,6 @@ module.exports = function( options, callback )
         }
         return options.fileContent;
     } ).catch( function( err ) {
-        console.log( err ); //#Debug
         if ( isFunction( callback ) ) {
             callback( err );
         }
