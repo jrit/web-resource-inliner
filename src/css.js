@@ -7,7 +7,6 @@ var search = require( "./util/search" );
 var isFunction = require( "./util/isFunction" );
 var isBase64Path = require( "./util/isBase64Path" );
 var isRemotePath = require( "./util/isRemotePath" );
-// var escapeSpecialChars = require( "./util/escapeSpecialChars" );
 var getFileReplacement = require( "./util/getFileReplacement" );
 
 module.exports = function( options, callback )
