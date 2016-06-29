@@ -31,7 +31,7 @@ module.exports = function( options, callback )
         return replace;
     }
 
-    return new Promise( function( resolve, reject ) {
+    var promise = new Promise( function( resolve, reject ) {
         if ( !options.fileContent ) {
             return reject( new Error( "No file content" ) );
         }
@@ -92,4 +92,8 @@ module.exports = function( options, callback )
         }
         return Promise.reject( err );
     } );
+
+    if ( !isFunction( callback ) ) {
+        return promise;
+    }
 };

@@ -58,7 +58,7 @@ module.exports = function( options, callback )
             } ];
         }
 
-        return Promise.all( [ "src", "href", "setsrc", "xlink:href" ].map( function( src ) {
+        return Promise.all( [ "src", "href", "srcset", "xlink:href" ].map( function( src ) {
             if ( !elem.attribs[src] ||
                 !inlineAttributeCheck() ||
                 isBase64Path( elem.attribs[src] ) ) {
@@ -146,7 +146,7 @@ module.exports = function( options, callback )
         } ) );
     }
 
-    return new Promise( function( resolve, reject ) {
+    var promise = new Promise( function( resolve, reject ) {
 
         var handler = new htmlparser.DomHandler( function ( err, dom ) {
             if ( err ) {
@@ -185,4 +185,8 @@ module.exports = function( options, callback )
         }
         return Promise.reject( err );
     } );
+
+    if ( !isFunction( callback ) ) {
+        return promise;
+    }
 };
