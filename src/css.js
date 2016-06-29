@@ -7,28 +7,32 @@ var search = require( "./util/search" );
 var isFunction = require( "./util/isFunction" );
 var isBase64Path = require( "./util/isBase64Path" );
 var isRemotePath = require( "./util/isRemotePath" );
-var escapeSpecialChars = require( "./util/escapeSpecialChars" );
+// var escapeSpecialChars = require( "./util/escapeSpecialChars" );
 var getFileReplacement = require( "./util/getFileReplacement" );
 
 module.exports = function( options, callback )
 {
     options = require( "./options" )( options );
+    var urlRegex = /url\(\s*["']?\s*([^)'"]+)\s*["']?\s*\);\s*(\/\*[^\*]+\*\/)?/gi;
 
-    function replace( search, replace ) {
-        var re = new RegExp( "url\\(\\s?[\"']?(" +
-            escapeSpecialChars( search ) +
-            ")[\"']?\\s?\\);([^\{\:]*)", "gi" );
+    function validateAttribute( attr ) {
+        function exp( str ) {
+            return new RegExp( "\\/\\*\\s*" + str + "\\s*\\*\\/", "i" );
+        }
+        if ( attr ) {
+            return ( !exp( options.inlineAttribute + "-ignore" ).test( attr ) &&
+                options.images || exp( options.inlineAttribute ).test( attr ) );
+        }
+        return true;
+    }
 
-        options.fileContent = options.fileContent.replace( re, function( origin, p1, p2 ) {
-            if ( ( !options.images && p2.indexOf( options.inlineAttribute + " " ) !== -1 ) ||
-                ( options.images && p2.indexOf( options.inlineAttribute + "-ignore " ) === -1 ) ) {
-                return "url(\"" + replace + "\");" + p2;
-            }
-
-            return "url(\"" + p1 + "\");" + p2;
+    function replace( src, content ) {
+        var replacement = src.replace( urlRegex, function( match, p1 ) {
+            return match.replace( p1, content );
         } );
 
-        return replace;
+        return options.fileContent =
+            options.fileContent.replace( src, replacement );
     }
 
     var promise = new Promise( function( resolve, reject ) {
@@ -36,10 +40,14 @@ module.exports = function( options, callback )
             return reject( new Error( "No file content" ) );
         }
 
-        return resolve( search(
-            /url\(\s?["']?([^)'"]+)["']?\s?\);/gi,
-            options.fileContent
+        return resolve(
+            search( urlRegex, options.fileContent
         ).reduce( function( result, src ) {
+            if ( !validateAttribute( src[2] ) ||
+                isBase64Path( src[1] ) ) {
+                return result;
+            }
+
             if ( !result[ src[1] ] ) {
                 result[ src[1] ] = [ src[0] ];
             } else {
@@ -49,10 +57,6 @@ module.exports = function( options, callback )
         }, {} ) );
     } ).then( function( matches ) {
         return Promise.all( Object.keys( matches ).map( function( src ) {
-            if ( isBase64Path( src ) ) {
-                return Promise.resolve(); // Skip
-            }
-
             return new Promise( function( resolve, reject ) {
                 var origin = src;
                 if ( !isRemotePath( src ) && options.rebaseRelativeTo ) {
@@ -76,7 +80,10 @@ module.exports = function( options, callback )
                     content.length > options.images * 1000 ) {
                     return; // Skip
                 }
-                return replace( src, content );
+
+                return Promise.all( matches[src].map( function( src ) {
+                    return replace( src, content );
+                } ) );
             } );
         } ) );
     } ).then( function() {

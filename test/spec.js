@@ -7,7 +7,20 @@ var fauxJax = require( "faux-jax" );
 var mime = require( "mime-types" );
 
 var inline = require( "../src/inline.js" );
-var escapeSpecialChars = require( "../src/util/escapeSpecialChars" );
+
+/**
+ * Escape special regex characters of a particular string
+ *
+ * @example
+ * "http://www.test.com" --> "http:\/\/www\.test\.com"
+ *
+ * @param  {String} str - string to escape
+ * @return {String} string with special characters escaped
+ */
+var escapeSpecialChars = function( str ) {
+    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, "\\$1" );
+};
+
 
 function normalize( contents )
 {
