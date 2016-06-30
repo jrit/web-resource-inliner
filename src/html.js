@@ -2,10 +2,10 @@
 
 var path = require( "path" );
 var htmlparser = require( "htmlparser2" );
+var xtend = require( "xtend" );
 
 var css = require( "./css" );
 var svg = require( "./svg" );
-var extend = require( "./util/extend" );
 var isBase64Path = require( "./util/isBase64Path" );
 var isCIDPath = require( "./util/isCIDPath" );
 
@@ -18,8 +18,8 @@ module.exports = function( options, callback )
     options = require( "./options" )( options );
     var sourceAttributes = [ "src", "href", "srcset", "xlink:href" ];
 
+    // Normalize svg and srcset paths
     function normalizeSource( src ) {
-        // Normalize svg and srcset paths
         if ( !src ) { return ""; }
         return src.split( "#" )[0].split( " " )[0];
     }
@@ -37,7 +37,7 @@ module.exports = function( options, callback )
         }
     }
 
-    function validateAttribute( el, attr ) {
+    function validateElement( el, attr ) {
         var src = el.attribs[ attr ];
 
         function inlineAttributeCheck() {
@@ -59,12 +59,12 @@ module.exports = function( options, callback )
 
     function getElementSources( el ) {
         return sourceAttributes.reduce( function( result, attr ) {
-            if ( !validateAttribute( el, attr ) ) {
+            if ( !validateElement( el, attr ) ) {
                 return result; // Skip
             }
 
             return result.concat( [
-                el.attribs[ attr ],
+                normalizeSource( el.attribs[ attr ] ),
                 ( el.name === "use" ? "svg" : el.name ),
                 getContentLimit( el )
             ] );
@@ -147,7 +147,7 @@ module.exports = function( options, callback )
 
         if ( el.name === "link" ) {
             // Inline images for each source in the CSS
-            return css( extend( options, {
+            return css( xtend( {}, options, {
                 fileContent: content,
                 rebaseRelativeTo: path.relative( options.relativeTo,
                     path.join( options.relativeTo, el.attribs[ attr ], ".." + path.sep ) )
@@ -171,23 +171,26 @@ module.exports = function( options, callback )
             return svg(
                 content,
                 el.attribs[ attr ].split( "#" )[1]
-            ).then( function( svgelent ) {
+            ).then( function( svgElement ) {
                 el.attribs = {};
-                for ( var prop in svgelent ) {
-                    if ( {}.hasOwnProperty.call( svgelent, prop ) ) {
-                        el[prop] = svgelent[prop];
+                for ( var prop in svgElement ) {
+                    if ( {}.hasOwnProperty.call( svgElement, prop ) ) {
+                        el[prop] = svgElement[prop];
                     }
                 }
             } );
         }
     }
 
-    function resolveElements( elements, source ) {
+    function resolveElements( elements, source, content ) {
         return Promise.all( elements.map( function( el ) {
             return Promise.all( sourceAttributes.map( function( attr ) {
-                if ( normalizeSource( el.attribs[ attr ] ) === source[0] &&
-                    validateAttribute( el, attr ) ) {
-                    return replaceContent( el, attr, source[1] );
+                if ( !el.attribs[ attr ] ) {
+                    return;
+                }
+                if ( normalizeSource( el.attribs[ attr ] ) === source &&
+                    validateElement( el, attr ) ) {
+                    return replaceContent( el, attr, content );
                 }
                 return;
             } ) );
@@ -235,7 +238,8 @@ module.exports = function( options, callback )
                     return;
                 }
 
-                return resolveElements( elements, source );
+                return resolveElements(
+                    elements, source[0], source[1] );
             } );
         } ) ).then( function() {
             // Re-construct HTML

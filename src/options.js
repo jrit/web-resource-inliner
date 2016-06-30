@@ -1,4 +1,4 @@
-var extend = require( "./util/extend" );
+var xtend = require( "xtend" );
 
 function resolveContent( content ) {
     if ( content instanceof Buffer ) {
@@ -10,7 +10,7 @@ function resolveContent( content ) {
 module.exports = function ( options ) {
     options.fileContent = resolveContent( options.fileContent );
 
-    return extend( {
+    return xtend( {}, {
         images: 8,
         svgs: 8,
         scripts: true,
