@@ -7,6 +7,7 @@ var css = require( "./css" );
 var svg = require( "./svg" );
 var extend = require( "./util/extend" );
 var isBase64Path = require( "./util/isBase64Path" );
+var isCIDPath = require( "./util/isCIDPath" );
 
 var getTextReplacement = require( "./util/getTextReplacement" );
 var getFileReplacement = require( "./util/getFileReplacement" );
@@ -16,6 +17,12 @@ module.exports = function( options, callback )
 {
     options = require( "./options" )( options );
     var sourceAttributes = [ "src", "href", "srcset", "xlink:href" ];
+
+    function normalizeSource( src ) {
+        // Normalize svg and srcset paths
+        if ( !src ) { return ""; }
+        return src.split( "#" )[0].split( " " )[0];
+    }
 
     function getContentLimit( el ) {
         switch ( el.name ) {
@@ -42,7 +49,8 @@ module.exports = function( options, callback )
 
         if ( !src ||
             !inlineAttributeCheck() ||
-            isBase64Path( src ) ) {
+            isBase64Path( src ) ||
+            isCIDPath( src ) ) {
             return false; // Skip
         }
 
@@ -74,7 +82,7 @@ module.exports = function( options, callback )
         } )();
 
         return new Promise( function( resolve, reject ) {
-            return replacer( src.split( "#" )[0], options, function( err, content ) {
+            return replacer( normalizeSource( src ), options, function( err, content ) {
                 if ( err ) {
                     if ( options.strict ) {
                         return reject( err );
@@ -128,8 +136,12 @@ module.exports = function( options, callback )
             } ];
         }
 
-        // Replace content and/or elent
+        // Replace content and/or element
         if ( el.name === "img" ) {
+            if ( attr === "srcset" ) {
+                content = content + " " +
+                    el.attribs[ attr ].split( " " )[1];
+            }
             return el.attribs[ attr ] = content;
         }
 
@@ -173,7 +185,7 @@ module.exports = function( options, callback )
     function resolveElements( elements, source ) {
         return Promise.all( elements.map( function( el ) {
             return Promise.all( sourceAttributes.map( function( attr ) {
-                if ( el.attribs[ attr ] === source[0] &&
+                if ( normalizeSource( el.attribs[ attr ] ) === source[0] &&
                     validateAttribute( el, attr ) ) {
                     return replaceContent( el, attr, source[1] );
                 }
@@ -207,7 +219,7 @@ module.exports = function( options, callback )
         // Gather and flatten sources
         var sources = elements.map( getElementSources )
         .reduce( function( result, source ) {
-            result[source[0]] = source;
+            result[ normalizeSource( source[0] ) ] = source;
             return result;
         }, {} );
 
@@ -215,6 +227,7 @@ module.exports = function( options, callback )
             if ( !sources[src].length ) {
                 return;
             }
+
 
             return resolveSource.apply( this, sources[src] )
             .then( function( source ) {

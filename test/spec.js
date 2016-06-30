@@ -301,6 +301,22 @@ describe( "html", function()
                 }
             );
         } );
+
+        it( "should support srcset", function( done )
+        {
+            var expected = readFile( "test/cases/img-srcset_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/img-srcset.html" ),
+                    relativeTo: "test/cases/",
+                    images: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
     describe( "svgs", function()

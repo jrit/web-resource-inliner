@@ -6,6 +6,8 @@ var path = require( "path" );
 var search = require( "./util/search" );
 var isFunction = require( "./util/isFunction" );
 var isBase64Path = require( "./util/isBase64Path" );
+var isCIDPath = require( "./util/isCIDPath" );
+
 var isRemotePath = require( "./util/isRemotePath" );
 var getFileReplacement = require( "./util/getFileReplacement" );
 
@@ -43,7 +45,8 @@ module.exports = function( options, callback )
             search( urlRegex, options.fileContent
         ).reduce( function( result, src ) {
             if ( !validateAttribute( src[2] ) ||
-                isBase64Path( src[1] ) ) {
+                isBase64Path( src[1] ) ||
+                isCIDPath( src[1] ) ) {
                 return result;
             }
 
