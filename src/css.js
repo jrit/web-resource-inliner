@@ -1,8 +1,7 @@
 "use strict";
 
-var CleanCSS = require( "clean-css" );
 var xtend = require( "xtend" );
-var async = require( "async" );
+var parallel = require( "async" ).parallel;
 var path = require( "path" );
 var constant = require( "lodash.constant" );
 var inline = require( "./util" );
@@ -86,12 +85,8 @@ module.exports = function( options, callback )
         }
     }
 
-    async.parallel( tasks, function( err )
+    parallel( tasks, function( err )
     {
-        if( !err )
-        {
-            result = settings.cssmin ? CleanCSS.process( result ) : result;
-        }
         callback( err, result );
     } );
 };

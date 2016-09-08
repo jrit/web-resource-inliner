@@ -4,7 +4,7 @@ var path = require( "path" );
 var constant = require( "lodash.constant" );
 var unescape = require( "lodash.unescape" );
 var xtend = require( "xtend" );
-var async = require( "async" );
+var parallel = require( "async" ).parallel;
 var inline = require( "./util" );
 var css = require( "./css" );
 var htmlparser = require( "htmlparser2" );
@@ -246,7 +246,7 @@ module.exports = function( options, callback )
 
     result = replaceInlineAttribute( result );
 
-    async.parallel( tasks, function( err )
+    parallel( tasks, function( err )
     {
         callback( err, result );
     } );
