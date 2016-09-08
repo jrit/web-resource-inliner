@@ -1,4 +1,5 @@
 ## Release History
+* 2016-09-07 v3.0.0 Breaking: Removed `cssmin` option; Feat: New `linkTransform` option which can replace cssmin, and is more flexible
 * 2016-03-30 v2.0.0 Feat: SVG `use` inlining; Feat: requestTransform; Fix: default gzip handling
 * 2015-11-03 v1.2.1 Fix: HTTP status codes undefined
 * 2015-10-23 v1.2.0 Enhancement: Strip value of data-inline(-ignore) attributes  

@@ -16,7 +16,6 @@ util.defaults = {
     svgs: 8,
     scripts: true,
     links: true,
-    cssmin: false,
     strict: false,
     relativeTo: "",
     rebaseRelativeTo: "",

@@ -64,9 +64,6 @@ Describes the path relationship between where web-resource-inliner is running an
 #### `rebaseRelativeTo`, string, default empty string
 Describes the path relationship between CSS content and the context it will be loaded in. For example, when a CSS file contains `url(some-file.png)` and the file is moved from a location in a folder like `/css` to `/` then the path to the image needs to be changed to `url(css/some-file.png)`. In this case, `rebaseRelativeTo` would be `css`. You probably don't want to set this when you are using `html()`.
 
-#### `cssmin`, Boolean, default `false`
-If cssmin is assigned `true`, CSS will be minified before inlined.
-
 #### `strict`, Boolean, default `false`
 When strict is `true`, a missing resource will cause the inliner to halt and return an error in the callback. The default behavior is to log a warning to the console and continue inlining with the available resources, which is more similar to how a web page behaves.
 
