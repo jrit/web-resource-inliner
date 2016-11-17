@@ -195,7 +195,7 @@ describe( "html", function()
                     relativeTo: "test/cases/",
                     scriptTransform: function( content, done )
                     {
-                        done( null, "/*inserted*/\n" + content );
+                        done( null, content );
                     }
                 },
                 function( err, result )

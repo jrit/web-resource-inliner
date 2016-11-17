@@ -39,7 +39,7 @@ util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
  */
 util.escapeSpecialChars = function( str )
 {
-    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/g, "\\$1" );
+    return str.replace( /(\/|\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\)/gm, "\\$1" );
 };
 
 util.isRemotePath = function( url )
@@ -59,6 +59,7 @@ util.getAttrs = function( tagMarkup, settings )
     {
         tag = tag[ 0 ];
         var attrs = tagMarkup
+            .replace( /(<[\s\S]*?(?=\>))([\s\S]*?(?=\<\/))(<\/[\w\W]>)?/gm, "$1>$3" )
             .replace( /^<[^\s>]*/, "" )
             .replace( /\/?>/, "" )
             .replace( />?\s?<\/[^>]*>$/, "" )

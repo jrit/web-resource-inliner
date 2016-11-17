@@ -44,7 +44,9 @@ module.exports = function( options, callback )
                 {
                     return callback( null );
                 }
-                var html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</script>";
+                var html = content.toString();
+                html = html.replace( /<\/script>/gmi, "<\\/script>" );
+                html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + html + "\n</script>";
                 var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
                 result = result.replace( re, constant( html ) );
                 return callback( null );
@@ -94,7 +96,9 @@ module.exports = function( options, callback )
                     {
                         return callback( err );
                     }
-                    var html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + content + "\n</style>";
+                    var html = content.toString();
+                    html = html.replace( /<\/script>/gmi, "<\\/script>" );
+                    html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + html.replace( /\/\*[\s]*--[\s]*>*/gm, "/* - ->" ) + "\n</style>";
                     var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
                     result = result.replace( re, constant( html ) );
                     return callback( null );
@@ -178,8 +182,9 @@ module.exports = function( options, callback )
 
     var inlineAttributeRegex = new RegExp( settings.inlineAttribute, "i" );
     var inlineAttributeIgnoreRegex = new RegExp( settings.inlineAttribute + "-ignore", "i" );
+    var relStylesheetAttributeIgnoreRegex = new RegExp( "stylesheet", "i" );
 
-    var scriptRegex = /<script\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>\s*<\/script>/gi;
+    var scriptRegex = /<script\b[^>]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>[\s\w\S]*?(?=<\/script>)<\/script>/gi;
     while( ( found = scriptRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
@@ -195,10 +200,11 @@ module.exports = function( options, callback )
         }
     }
 
-    var linkRegex = /<link\b[\s\S]+?\bhref\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
+    var linkRegex = /<link\b[\s\S]+?\bhref\s*=\s*("|')([\s\S]*?)\1[\s\S]*?>/gm;
     while( ( found = linkRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            relStylesheetAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             tasks.push( replaceLink.bind(
@@ -211,7 +217,7 @@ module.exports = function( options, callback )
         }
     }
 
-    var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gi;
+    var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gm;
     while( ( found = imgRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
