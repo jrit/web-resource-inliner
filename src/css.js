@@ -3,7 +3,6 @@
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var path = require( "path" );
-var constant = require( "lodash.constant" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
@@ -32,7 +31,7 @@ module.exports = function( options, callback )
 
             var css = "url(\"" + datauriContent + "\");";
             var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\);", "g" );
-            result = result.replace( re, constant( css ) );
+            result = result.replace( re, () => css );
 
             return callback( null );
         } );
@@ -42,7 +41,7 @@ module.exports = function( options, callback )
     {
         var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\");";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\);", "g" );
-        result = result.replace( re, constant( css ) );
+        result = result.replace( re, () => css );
     };
 
     var result = settings.fileContent;
@@ -54,13 +53,15 @@ module.exports = function( options, callback )
     if( settings.rebaseRelativeTo )
     {
         var matches = {};
+        var src;
+
         while( ( found = urlRegex.exec( result ) ) !== null )
         {
-            var src = found[ 1 ];
+            src = found[ 1 ];
             matches[ src ] = true;
         }
 
-        for( var src in matches )
+        for( src in matches )
         {
             if( !inline.isRemotePath( src ) && !inline.isBase64Path( src ) )
             {

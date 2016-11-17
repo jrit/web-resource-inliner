@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require( "path" );
-var constant = require( "lodash.constant" );
 var unescape = require( "lodash.unescape" );
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
@@ -48,7 +47,7 @@ module.exports = function( options, callback )
                 html = html.replace( /<\/script>/gmi, "<\\/script>" );
                 html = "<script" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + html + "\n</script>";
                 var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-                result = result.replace( re, constant( html ) );
+                result = result.replace( re, () => html );
                 return callback( null );
             };
 
@@ -100,7 +99,7 @@ module.exports = function( options, callback )
                     html = html.replace( /<\/script>/gmi, "<\\/script>" );
                     html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">\n" + html.replace( /\/\*[\s]*--[\s]*>*/gm, "/* - ->" ) + "\n</style>";
                     var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-                    result = result.replace( re, constant( html ) );
+                    result = result.replace( re, () => html );
                     return callback( null );
                 } );
             };
@@ -131,7 +130,7 @@ module.exports = function( options, callback )
             }
             var html = "<img" + ( args.attrs ? " " + args.attrs : "" ) + " src=\"" + datauriContent + "\" />";
             var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-            result = result.replace( re, constant( html ) );
+            result = result.replace( re, () => html );
             return callback( null );
         } );
     };
@@ -165,7 +164,7 @@ module.exports = function( options, callback )
                 {
                     var use = htmlparser.DomUtils.getInnerHTML( svg[ 0 ] );
                     var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
-                    result = result.replace( re, constant( use ) );
+                    result = result.replace( re, () => use );
                 }
 
                 return callback( null );
