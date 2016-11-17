@@ -167,9 +167,9 @@ util.getTextReplacement = function( src, settings, callback )
 
 util.getFileReplacement = function( src, settings, callback )
 {
-    if( !src )
+    if( !src || util.srcIsCid( src ) )
     {
-        callback( null, "" );
+        callback( null );
     }
     else if( util.isRemotePath( settings.relativeTo ) )
     {
@@ -184,6 +184,11 @@ util.getFileReplacement = function( src, settings, callback )
         var result = ( new datauri( util.getInlineFilePath( src, settings.relativeTo ) ) ).content;
         callback( result === undefined ? new Error( "Local file not found" ) : null, result );
     }
+};
+
+util.srcIsCid = function( src )
+{
+    return src.match( /^cid:/ );
 };
 
 util.handleReplaceErr = function( err, src, strict, callback )
