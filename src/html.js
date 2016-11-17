@@ -216,7 +216,7 @@ module.exports = function( options, callback )
         }
     }
 
-    var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]+?)\1[\s\S]*?>/gm;
+    var imgRegex = /<img\b[\s\S]+?\bsrc\s*=\s*("|')([\s\S]*?)\1[\s\S]*?>/gm;
     while( ( found = imgRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
