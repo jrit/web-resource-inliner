@@ -29,8 +29,8 @@ module.exports = function( options, callback )
                 return callback( null ); // Skip
             }
 
-            var css = "url(\"" + datauriContent + "\");";
-            var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\);", "g" );
+            var css = "url(\"" + datauriContent + "\")";
+            var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( args.src ) + ")[\"']?\\s?\\)", "g" );
             result = result.replace( re, () => css );
 
             return callback( null );
@@ -39,8 +39,8 @@ module.exports = function( options, callback )
 
     var rebase = function( src )
     {
-        var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\");";
-        var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\);", "g" );
+        var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\")";
+        var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\)", "g" );
         result = result.replace( re, () => css );
     };
 
@@ -48,17 +48,19 @@ module.exports = function( options, callback )
     var tasks = [];
     var found = null;
 
-    var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\);.*/gi;
+    var urlRegex = /url\(\s?["']?([^)'"]+)["']?\s?\).*/i;
+    var index = 0;
 
     if( settings.rebaseRelativeTo )
     {
         var matches = {};
         var src;
 
-        while( ( found = urlRegex.exec( result ) ) !== null )
+        while( ( found = urlRegex.exec( result.substring(index) ) ) !== null )
         {
             src = found[ 1 ];
             matches[ src ] = true;
+            index = found.index + index + 1;
         }
 
         for( src in matches )
@@ -73,7 +75,8 @@ module.exports = function( options, callback )
     var inlineAttributeCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "\\s?\\*\\/", "i" );
     var inlineAttributeIgnoreCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "i" );
 
-    while( ( found = urlRegex.exec( result ) ) !== null )
+    index = 0;
+    while( ( found = urlRegex.exec( result.substring(index) ) ) !== null )
     {
         if( !inlineAttributeIgnoreCommentRegex.test( found[ 0 ] ) &&
             ( settings.images || inlineAttributeCommentRegex.test( found[ 0 ] ) ) )
@@ -84,6 +87,7 @@ module.exports = function( options, callback )
                 limit: settings.images
             } ) );
         }
+        index = found.index + index + 1;
     }
 
     parallel( tasks, function( err )
