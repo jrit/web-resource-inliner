@@ -133,7 +133,7 @@ function getRemote( uri, settings, callback, toDataUri )
 util.getInlineFilePath = function( src, relativeTo )
 {
     src = src.replace( /^\//, "" );
-    return path.resolve( relativeTo, src ).replace( /\?.*$/, "" );
+    return path.resolve( relativeTo, src ).replace( /[\?#].*$/, "" );
 };
 
 util.getInlineFileContents = function( src, relativeTo )
