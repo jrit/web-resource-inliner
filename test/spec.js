@@ -152,6 +152,22 @@ describe( "html", function()
                 }
             );
         } );
+
+        it( "should rebase inline local links relative to", function( done )
+        {
+            var expected = readFile( "test/cases/css-rebase_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-rebase.html" ),
+                    relativeTo: "test/cases/",
+                    rebaseRelativeTo: "test/cases/assets/fonts"
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
     } );
 
     describe( "scripts", function()
@@ -572,6 +588,22 @@ describe( "css", function()
                 fileContent: readFile( "test/cases/css-remote.css" ),
                 relativeTo: "test/cases/",
                 images: true
+            },
+            function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            }
+        );
+    } );
+
+    it( "should rebase local urls", function( done )
+    {
+        var expected = readFile( "test/cases/css-rebase_out.css" );
+
+        inline.css( {
+                fileContent: readFile( "test/cases/css-rebase.css" ),
+                rebaseRelativeTo: "assets",
+                images: false
             },
             function( err, result )
             {
