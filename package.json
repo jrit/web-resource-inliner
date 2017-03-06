@@ -1,12 +1,11 @@
 {
   "author": {
     "name": "Jarrett Widman",
-    "email": "jarrett.widman@vokal.io",
     "url": "https://github.com/jrit"
   },
   "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "keywords": [
     "inline",
     "js",
