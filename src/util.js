@@ -7,6 +7,8 @@ var fs = require( "fs" );
 var request = require( "request" );
 var chalk = require( "chalk" );
 
+var dataURI = /^\s*data:([a-z]+\/[a-z0-9\-\+]+(;[a-z\-]+=[a-z0-9\-]+)?)?(;base64)?,[a-z0-9!\$&',\(\)\*\+,;=\-\._~:@\/\?%\s]*\s*$/i;
+
 var util = {};
 
 module.exports = util;
@@ -178,6 +180,10 @@ util.getFileReplacement = function( src, settings, callback )
     else if( util.isRemotePath( src ) )
     {
         getRemote( src, settings, callback, true );
+    }
+    else if( dataURI.test( src ) )
+    {
+        callback( null, result );
     }
     else
     {
