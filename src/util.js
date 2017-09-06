@@ -86,7 +86,7 @@ function getRemote( uri, settings, callback, toDataUri )
 
     var requestOptions = {
         uri: uri,
-        encoding: toDataUri ? "binary" : "",
+        encoding: toDataUri && "binary",
         gzip: true
     };
 
