@@ -1,4 +1,4 @@
-# web-resource-inliner[![build status](https://secure.travis-ci.org/jrit/web-resource-inliner.png)](http://travis-ci.org/jrit/web-resource-inliner)
+# web-resource-inliner [![build status](https://api.travis-ci.org/jrit/web-resource-inliner.svg)](http://travis-ci.org/jrit/web-resource-inliner)
 
 Brings externally referenced resources, such as js, css and images, into a single file.
 
