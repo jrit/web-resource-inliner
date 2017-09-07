@@ -1,5 +1,8 @@
 ## Release History
 
+### 2017-09-06 *v4.1.1*
+Fixes: buffer.toString() encoding fix for nodejs 8
+
 ### 2017-03-06 *v4.1.0*
 Fixes: Use `rebaseRelativeTo` if it is defined; Fix to rebase urls that appear on the same line; Support fragment URLs when getting inline file path. [PR Ref](https://github.com/jrit/web-resource-inliner/pull/27)
 
