@@ -6,6 +6,7 @@ var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
 var chalk = require( "chalk" );
+var validDataUrl = require( "valid-data-url" );
 
 var util = {};
 
@@ -178,6 +179,10 @@ util.getFileReplacement = function( src, settings, callback )
     else if( util.isRemotePath( src ) )
     {
         getRemote( src, settings, callback, true );
+    }
+    else if( validDataUrl( src ) )
+    {
+        callback( null, src );
     }
     else
     {

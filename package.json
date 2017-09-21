@@ -37,6 +37,7 @@
     "htmlparser2": "^3.9.2",
     "lodash.unescape": "^4.0.1",
     "request": "^2.78.0",
+    "valid-data-url": "^0.1.4",
     "xtend": "^4.0.0"
   },
   "scripts": {
