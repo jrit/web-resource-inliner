@@ -89,6 +89,20 @@ describe( "html", function()
             );
         } );
 
+        it( "should keep data: uris as-is", function( done )
+        {
+            var expected = readFile( "test/cases/data-uri.html" );
+
+            inline.html( {
+                    fileContent: expected,
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+
         it( "should inline remote links with no protocol", function( done )
         {
             var expected = readFile( "test/cases/css-remote-no-protocol_out.html" );
