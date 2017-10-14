@@ -591,7 +591,7 @@ describe( "html", function()
         {
             fauxJax.on( "request", function( request )
             {
-                assert( request.requestBody.indexOf('foo=bar') !== -1 );
+                assert( request.requestBody.indexOf("foo=bar") !== -1 );
             } );
             inline.html( {
                 fileContent: "<img src=\"assets/icon.png\"><img src=\"assets/icon.png?a=1\">",
