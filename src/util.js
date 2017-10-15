@@ -94,7 +94,7 @@ function getRemote( uri, settings, callback, toDataUri )
         {
             return callback();
         }
-        if( transformedOptions ===  undefined )
+        if( transformedOptions === undefined )
         {
             return callback( new Error( uri + " requestTransform returned `undefined`" ) );
         }
