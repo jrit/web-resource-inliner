@@ -4,7 +4,7 @@ var path = require( "path" );
 var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
-var request = require( "request" );
+var request = require( "jetta" ).request;
 var chalk = require( "chalk" );
 var validDataUrl = require( "valid-data-url" );
 
@@ -45,7 +45,7 @@ util.escapeSpecialChars = function( str )
 
 util.isRemotePath = function( url )
 {
-    return /^'?https?:\/\/|^\/\//.test( url );
+    return /^'?(https?|file):\/\/|^\/\//.test( url );
 };
 
 util.isBase64Path = function( url )
@@ -85,11 +85,7 @@ function getRemote( uri, settings, callback, toDataUri )
         uri = "https:" + uri;
     }
 
-    var requestOptions = {
-        uri: uri,
-        encoding: toDataUri && "binary",
-        gzip: true
-    };
+    var requestOptions = {};
 
     if( typeof settings.requestTransform === "function" )
     {
@@ -106,27 +102,28 @@ function getRemote( uri, settings, callback, toDataUri )
     }
 
     request(
+        uri,
         requestOptions,
-        function( err, response, body )
+        function( err, results )
         {
             if( err )
             {
                 return callback( err );
             }
-            else if( response.statusCode !== 200 )
+            else if( results.statusCode !== 200 && results.url.parsedURL.protocol !== "file:" )
             {
-                return callback( new Error( uri + " returned http " + response.statusCode ) );
+                return callback( new Error( uri + " returned http " + results.statusCode ) );
             }
 
             if( toDataUri )
             {
-                var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
-                var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
+                var b64 = new Buffer( results.data, "binary" ).toString( "base64" );
+                var datauriContent = "data:" + results.responseHeaders[ "content-type" ] + ";base64," + b64;
                 return callback( null, datauriContent );
             }
             else
             {
-                return callback( null, body );
+                return callback( null, results.data );
             }
         } );
 }

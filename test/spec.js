@@ -7,6 +7,7 @@ var inline = require( "../src/inline.js" );
 var util = require( "../src/util.js" );
 var fauxJax = require( "faux-jax" );
 var mime = require( "mime-types" );
+var fileUrl = require( "file-url" );
 
 function normalize( contents )
 {
@@ -57,6 +58,8 @@ function testEquality( err, result, expected, done )
 
 describe( "html", function()
 {
+    this.timeout(5000)
+
     describe( "links", function()
     {
         it( "should inline local links", function( done )
@@ -101,6 +104,24 @@ describe( "html", function()
                     testEquality( err, result, expected, done );
                 }
             );
+        } );
+
+        it( "should inline links with file:// protocol", function( done )
+        {
+            var input = readFile( "test/cases/file-protocol.html" )
+                .replace("%FILE_PATH%", fileUrl(__dirname + "/cases/assets/export.js" ) );
+
+            var expected = readFile( "test/cases/file-protocol_out.html" );
+
+            inline.html( {
+                    fileContent: input
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+
         } );
 
         it( "should inline remote links with no protocol", function( done )
@@ -411,7 +432,7 @@ describe( "html", function()
             },
             function( err, result )
             {
-                assert.equal( err.message, "https://raw.githubusercontent.com/not-a-file.css returned http 400" );
+                assert.equal( err.message, "Request received bad response code" );
                 done();
             }
         );
@@ -553,11 +574,24 @@ describe( "html", function()
             } );
         } );
 
+        it(" should throw an error if requestTransform function does not return in strict mode ", function ( done )
+        {
+            inline.html( {
+                fileContent: "<img src=\"assets/icon.png\"><img src=\"assets/icon.png?a=1\">",
+                relativeTo: baseUrl,
+                strict: true,
+                requestTransform: function( options ) { }
+            }, function( err, result ) {
+                assert( err.message.indexOf( "undefined" ) !== -1 );
+                done();
+            } );
+        } )
+
         it( "should apply the requestTransform option", function( done )
         {
             fauxJax.on( "request", function( request )
             {
-                assert( request.requestURL.indexOf( "foo=bar" ) !== -1 );
+                assert( request.requestBody.indexOf( "foo=bar" ) !== -1 );
             } );
             inline.html( {
                 fileContent: "<img src=\"assets/icon.png\"><img src=\"assets/icon.png?a=1\">",
@@ -567,9 +601,11 @@ describe( "html", function()
                 images: true,
                 requestTransform: function( options )
                 {
-                    options.qs = {
+                    options.form = {
                         foo: "bar"
                     };
+
+                    return options;
                 }
             }, done );
         } );
