@@ -504,6 +504,30 @@ describe( "html", function()
             fauxJax.restore();
         } );
 
+        it.only( "should respect absolute root paths inside css files", function( done )
+        {
+            inline.html( {
+                fileContent: readFile( "test/cases/css-root-path.html" ),
+                relativeTo: baseUrl,
+                links: true,
+                requestTransform: function( options )
+                {
+                    if ( options.uri.indexOf('icon.png') !== -1 )
+                    {
+                        assert.equal( options.uri, baseUrl + 'icon.png' );
+                        done();
+                    }
+                    return options;
+                }
+            }, function( err, result )
+            {
+                if (err)
+                {
+                    throw err;
+                }
+            } );
+        } );
+
         it( "should use the base url (relativeTo) to resolve image URLs", function( done )
         {
             var expected = readFile( "test/cases/img_out.html" );
