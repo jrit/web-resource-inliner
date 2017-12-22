@@ -39,7 +39,7 @@ module.exports = function( options, callback )
 
     var rebase = function( src )
     {
-        var resolved = path.resolve( '/', settings.rebaseRelativeTo, src ).substring( 1 )
+        var resolved = path.resolve( '/', settings.rebaseRelativeTo, src ).substring( 1 );
         var css = "url(\"" + resolved.replace( /\\/g, "/" ) + "\")";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\)", "g" );
         result = result.replace( re, () => css );
