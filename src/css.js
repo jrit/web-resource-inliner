@@ -3,7 +3,6 @@
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var path = require( "path" );
-var url = require( "url" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
