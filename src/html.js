@@ -69,7 +69,6 @@ module.exports = function( options, callback )
         {
             if( err )
             {
-                console.log(err)
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
 

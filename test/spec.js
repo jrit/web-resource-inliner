@@ -504,7 +504,7 @@ describe( "html", function()
             fauxJax.restore();
         } );
 
-        it.only( "should respect absolute root paths inside css files", function( done )
+        it( "should respect absolute root paths inside css files", function( done )
         {
             inline.html( {
                 fileContent: readFile( "test/cases/css-root-path.html" ),
