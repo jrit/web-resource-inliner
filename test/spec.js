@@ -57,7 +57,7 @@ function testEquality( err, result, expected, done )
 
 describe( "html", function()
 {
-    this.timeout(5000)
+    this.timeout(5000);
 
     describe( "links", function()
     {
@@ -509,7 +509,7 @@ describe( "html", function()
 
         it( "should not try to inline empty links", function( done )
         {
-            const content = '<link href="" rel="stylesheet" />'
+            const content = '<link href="" rel="stylesheet" />';
 
             inline.html( {
                     fileContent: content,
@@ -597,7 +597,7 @@ describe( "html", function()
 
 describe( "css", function()
 {
-    this.timeout(5000)
+    this.timeout(5000);
 
     it( "should inline local urls", function( done )
     {

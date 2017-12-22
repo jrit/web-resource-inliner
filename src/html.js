@@ -189,7 +189,7 @@ module.exports = function( options, callback )
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
-            var src = unescape( found[ 2 ] ).trim()
+            var src = unescape( found[ 2 ] ).trim();
             if (src)
             {
                 tasks.push( replaceScript.bind(
@@ -230,7 +230,7 @@ module.exports = function( options, callback )
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
-            var src = unescape( found[ 2 ] ).trim()
+            var src = unescape( found[ 2 ] ).trim();
             if (src) {
                 tasks.push( replaceImg.bind(
                 {
