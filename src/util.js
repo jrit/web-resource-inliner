@@ -206,10 +206,7 @@ util.handleReplaceErr = function( err, src, strict, callback )
     }
     else
     {
-        if (src.indexOf('chos.png') !== -1) {
-            console.warn( chalk.yellow( "Not found, skipping: " + src ) );
-            console.error(err)
-        }
+        console.warn( chalk.yellow( "Not found, skipping: " + src ) );
         return callback( null );
     }
 };
