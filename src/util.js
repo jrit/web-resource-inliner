@@ -172,6 +172,10 @@ util.getFileReplacement = function( src, settings, callback )
     {
         callback( null );
     }
+    else if( validDataUrl( src ) )
+    {
+        callback( null, src );
+    }
     else if( util.isRemotePath( settings.relativeTo ) )
     {
         getRemote( url.resolve( settings.relativeTo, src ), settings, callback, true );
@@ -179,10 +183,6 @@ util.getFileReplacement = function( src, settings, callback )
     else if( util.isRemotePath( src ) )
     {
         getRemote( src, settings, callback, true );
-    }
-    else if( validDataUrl( src ) )
-    {
-        callback( null, src );
     }
     else
     {
