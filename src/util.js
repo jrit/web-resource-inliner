@@ -85,6 +85,8 @@ function getRemote( uri, settings, callback, toDataUri )
         uri = "https:" + uri;
     }
 
+    uri = encodeURI(uri)
+
     var requestOptions = {
         uri: uri,
         encoding: toDataUri && "binary",
@@ -204,7 +206,10 @@ util.handleReplaceErr = function( err, src, strict, callback )
     }
     else
     {
-        console.warn( chalk.yellow( "Not found, skipping: " + src ) );
+        if (src.indexOf('chos.png') !== -1) {
+            console.warn( chalk.yellow( "Not found, skipping: " + src ) );
+            console.error(err)
+        }
         return callback( null );
     }
 };
