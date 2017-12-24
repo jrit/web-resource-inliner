@@ -524,7 +524,7 @@ describe( "html", function()
             {
                 testEquality( err, result, expected, done );
             } );
-        })
+        } );
 
         it( "should use the base url (relativeTo) to resolve image URLs", function( done )
         {
