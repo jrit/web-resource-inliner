@@ -86,7 +86,14 @@ module.exports = function( options, callback )
 
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
-                    rebaseRelativeTo: path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
+                    rebaseRelativeTo: path.relative(
+                        settings.relativeTo,
+                        settings.rebaseRelativeTo || (
+                            inline.isRemotePath( args.src )
+                                ? path.join( args.src, ".." + path.sep )
+                                : path.join( settings.relativeTo, args.src, ".." + path.sep )
+                        )
+                    )
                 } );
 
                 css( cssOptions, function( err, content )

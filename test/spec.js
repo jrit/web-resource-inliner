@@ -504,6 +504,28 @@ describe( "html", function()
             fauxJax.restore();
         } );
 
+        it( "should resolve image URLs when link was imported through an absolute path", function( done )
+        {
+            var expected = readFile( "test/cases/absolute-link_out.html" )
+            inline.html( {
+                fileContent: readFile( "test/cases/absolute-link.html" ),
+                relativeTo: baseUrl,
+                links: true,
+                images: true,
+                requestTransform: function( req )
+                {
+                    if ( req.uri.indexOf('icon.png') !== -1 )
+                    {
+                        assert.equal( req.uri, baseUrl + 'assets/icon.png' );
+                    }
+                    return req;
+                }
+            }, function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            } );
+        })
+
         it( "should use the base url (relativeTo) to resolve image URLs", function( done )
         {
             var expected = readFile( "test/cases/img_out.html" );
