@@ -85,6 +85,8 @@ function getRemote( uri, settings, callback, toDataUri )
         uri = "https:" + uri;
     }
 
+    uri = encodeURI(uri)
+
     var requestOptions = {
         uri: uri,
         encoding: toDataUri && "binary",
