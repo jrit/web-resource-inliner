@@ -56,7 +56,7 @@ module.exports = function( options, callback )
         var matches = {};
         var src;
 
-        while( ( found = urlRegex.exec( result.substring(index) ) ) !== null )
+        while( ( found = urlRegex.exec( result.substring( index ) ) ) !== null )
         {
             src = found[ 1 ];
             matches[ src ] = true;
@@ -76,7 +76,7 @@ module.exports = function( options, callback )
     var inlineAttributeIgnoreCommentRegex = new RegExp( "\\/\\*\\s?" + settings.inlineAttribute + "-ignore\\s?\\*\\/", "i" );
 
     index = 0;
-    while( ( found = urlRegex.exec( result.substring(index) ) ) !== null )
+    while( ( found = urlRegex.exec( result.substring( index ) ) ) !== null )
     {
         if( !inlineAttributeIgnoreCommentRegex.test( found[ 0 ] ) &&
             ( settings.images || inlineAttributeCommentRegex.test( found[ 0 ] ) ) )

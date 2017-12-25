@@ -1,5 +1,8 @@
 ## Release History
 
+### 2017-09-06 *v4.2.1*
+Fixes: handling of empty srcs
+
 ### 2017-09-06 *v4.2.0*
 Fixes: Skip inlining of srcs that are already data uris
 
