@@ -1,6 +1,7 @@
 "use strict";
 
 var path = require( "path" );
+var url = require( "url" );
 var unescape = require( "lodash.unescape" );
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
@@ -84,17 +85,27 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
+                var absSrc = inline.isRemotePath( args.src )
+                    ? args.src
+                    : url.resolve( settings.relativeTo, args.src );
+
+                var rebaseRelativeTo = settings.rebaseRelativeTo || path.relative(
+                    settings.relativeTo,
+                    path.dirname( absSrc )
+                );
+
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
-                    rebaseRelativeTo: path.relative(
-                        settings.relativeTo,
-                        settings.rebaseRelativeTo || (
-                            inline.isRemotePath( args.src )
-                                ? path.join( args.src, ".." + path.sep )
-                                : path.join( settings.relativeTo, args.src, ".." + path.sep )
-                        )
-                    )
+                    rebaseRelativeTo: rebaseRelativeTo
                 } );
+
+                console.log(` found css file with
+                    absSrc ${absSrc}
+                    dirname of absSrc ${path.dirname(absSrc)}
+                    src ${args.src}
+                    relativeTo ${settings.relativeTo}
+                    rebaseRelativeTo ${rebaseRelativeTo}
+                `)
 
                 css( cssOptions, function( err, content )
                 {
