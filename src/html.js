@@ -84,14 +84,32 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
-                var rebaseRelativeTo2 = path.relative( settings.relativeTo, path.dirname( args.src ) );
-                console.log(`rebaseRelativeTo2 is ${rebaseRelativeTo2}
+                // var rebaseRelativeTo = path.relative( settings.relativeTo, path.dirname( args.src ) );
+
+
+                // path.relative(
+                //     settings.relativeTo,
+                //     settings.rebaseRelativeTo || (
+                //         inline.isRemotePath( args.src )
+                //             ? path.join( args.src, ".." + path.sep )
+                //             : path.join( settings.relativeTo, args.src, ".." + path.sep )
+                //     )
+                // )
+
+                var rebaseRelativeTo = path.relative(
+                    settings.relativeTo,
+                    settings.rebaseRelativeTo || (
+                        path.relative( settings.relativeTo, path.dirname( args.src ) )
+                    )
+                )
+
+                console.log(`rebaseRelativeTo is ${rebaseRelativeTo}
                     with relativeTo ${settings.relativeTo}
                     and src ${args.src}`)
 
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
-                    rebaseRelativeTo: rebaseRelativeTo2 // path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
+                    rebaseRelativeTo: rebaseRelativeTo // path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
                 } );
 
                 css( cssOptions, function( err, content )

@@ -510,7 +510,7 @@ describe( "html", function()
             fauxJax.restore();
         } );
 
-        it.only( "should resolve relative paths inside absolute src links that are a level lower than the base url", function ( done )
+        it( "should resolve relative paths inside absolute src links that are a level lower than the base url", function ( done )
         {
             baseUrl += "en/";
 
