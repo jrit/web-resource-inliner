@@ -1,6 +1,7 @@
 "use strict";
 
 var path = require( "path" );
+var url = require( "url" );
 var unescape = require( "lodash.unescape" );
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
@@ -84,32 +85,18 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
-                // var rebaseRelativeTo = path.relative( settings.relativeTo, path.dirname( args.src ) );
+                var absSrc = inline.isRemotePath( args.src )
+                    ? args.src
+                    : url.resolve( settings.relativeTo, args.src );
 
-
-                // path.relative(
-                //     settings.relativeTo,
-                //     settings.rebaseRelativeTo || (
-                //         inline.isRemotePath( args.src )
-                //             ? path.join( args.src, ".." + path.sep )
-                //             : path.join( settings.relativeTo, args.src, ".." + path.sep )
-                //     )
-                // )
-
-                var rebaseRelativeTo = path.relative(
+                var rebaseRelativeTo = settings.rebaseRelativeTo || path.relative(
                     settings.relativeTo,
-                    settings.rebaseRelativeTo || (
-                        path.relative( settings.relativeTo, path.dirname( args.src ) )
-                    )
-                )
-
-                console.log(`rebaseRelativeTo is ${rebaseRelativeTo}
-                    with relativeTo ${settings.relativeTo}
-                    and src ${args.src}`)
+                    path.dirname( absSrc )
+                );
 
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
-                    rebaseRelativeTo: rebaseRelativeTo // path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
+                    rebaseRelativeTo: rebaseRelativeTo
                 } );
 
                 css( cssOptions, function( err, content )
