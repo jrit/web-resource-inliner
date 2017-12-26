@@ -84,9 +84,14 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
+                var rebaseRelativeTo2 = path.relative( settings.relativeTo, path.dirname( args.src ) );
+                console.log(`rebaseRelativeTo2 is ${rebaseRelativeTo2}
+                    with relativeTo ${settings.relativeTo}
+                    and src ${args.src}`)
+
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
-                    rebaseRelativeTo: path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
+                    rebaseRelativeTo: rebaseRelativeTo2 // path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
                 } );
 
                 css( cssOptions, function( err, content )
