@@ -13,6 +13,8 @@ var readFile = require( "./lib/util").readFile;
 
 describe( "remote", function()
 {
+    this.timeout(5000);
+
     describe( "html", function()
     {
         describe( "links", function()
