@@ -482,18 +482,24 @@ describe( "html", function()
 
     describe( "(http mocking)", function()
     {
-        var baseUrl = "http://example.com/";
+        var rootBaseUrl = "http://example.com/";
+        var baseUrl;
 
         beforeEach( function()
         {
+            baseUrl = rootBaseUrl;
+
             fauxJax.install();
             fauxJax.on( "request", function( request )
             {
-                assert.equal( request.requestURL.indexOf( baseUrl ), 0 );
-                var relativePath = request.requestURL.slice( baseUrl.length ).replace( /\?.*/, "" );
+                assert.equal( request.requestURL.indexOf( rootBaseUrl ), 0 );
+
+                var relativePath = request.requestURL.slice( rootBaseUrl.length ).replace( /\?.*/, "" );
+
                 var headers = {
                     "Content-Type": mime.contentType( path.extname( relativePath ) ) || "application/octet-stream"
                 };
+
                 var content = fs.readFileSync( "test/cases/" + relativePath );
                 request.respond( 200, headers, content );
             } );
@@ -502,6 +508,60 @@ describe( "html", function()
         afterEach( function()
         {
             fauxJax.restore();
+        } );
+
+        it.only( "should resolve relative paths inside absolute src links that are a level lower than the base url", function ( done )
+        {
+            baseUrl += "en/";
+
+            inline.html( {
+                fileContent: readFile( "test/cases/absolute-link.html" ),
+                relativeTo: baseUrl,
+                links: true,
+                images: true,
+                requestTransform: function ( req )
+                {
+                    if ( req.uri.indexOf( "icon.png" ) !== -1 )
+                    {
+                        assert.equal( req.uri, rootBaseUrl + "assets/icon.png" )
+                        done();
+                    }
+
+                    return req;
+                }
+            }, function( err, result )
+            {
+                if (err) {
+                    throw err;
+                }
+            });
+        } );
+
+        it( "should resolve relative paths inside relative src links that are a level lower than the base url", function ( done )
+        {
+            baseUrl += "en/";
+
+            inline.html( {
+                fileContent: readFile( "test/cases/down-path-link.html" ),
+                relativeTo: baseUrl,
+                links: true,
+                images: true,
+                requestTransform: function ( req )
+                {
+                    if ( req.uri.indexOf( "icon.png" ) !== -1 )
+                    {
+                        assert.equal( req.uri, rootBaseUrl + "assets/icon.png" )
+                        done();
+                    }
+
+                    return req;
+                }
+            }, function( err, result )
+            {
+                if (err) {
+                    throw err;
+                }
+            });
         } );
 
         it( "should use the base url (relativeTo) to resolve image URLs", function( done )
