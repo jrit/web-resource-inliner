@@ -92,14 +92,14 @@ module.exports = function( options, callback )
                 {
                     if ( inline.isRemotePath( args.src ) )
                     {
-                        rebaseRelativeTo = path.dirname( args.src );
+                        rebaseRelativeTo = path.dirname( args.src ) + "/";
                     }
                     else
                     {
                         var absSrc = url.resolve( settings.relativeTo, args.src );
                         rebaseRelativeTo = path.relative(
                             settings.relativeTo,
-                            path.dirname( absSrc )
+                            path.dirname( absSrc ) + "/"
                         );
                     }
                 }
