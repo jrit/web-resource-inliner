@@ -26,10 +26,10 @@ describe( "local", function()
         fauxJax.install();
         fauxJax.on( "request", function( request )
         {
-            var localPathIndex = (request.requestURL.indexOf( rootBaseUrl ) !== -1)
+            var localPathIndex = ( request.requestURL.indexOf( rootBaseUrl.replace( "http:", "" ) ) !== -1)
                 && rootBaseUrl.length;
 
-            var externalPathIndex = (request.requestURL.indexOf( externalBaseUrl ) !== -1)
+            var externalPathIndex = ( request.requestURL.indexOf( externalBaseUrl.replace( "http:", "" ) ) !== -1)
                 && externalBaseUrl.length;
 
             if (!localPathIndex && !externalPathIndex)
@@ -224,6 +224,40 @@ describe( "local", function()
                 {
                     testEquality( err, result, expected, done );
                 });
+            } );
+
+            it( "should resolve absolute links without a protocol (//) on the same domain", function ( done )
+            {
+                inline.html( {
+                    fileContent: "<link href=\"//example.com/assets/simple.css\" rel=\"stylesheet\"/>",
+                    relativeTo: baseUrl,
+                    links: true
+                }, function(err, result)
+                {
+                    if ( err )
+                    {
+                        throw err;
+                    }
+                    assert.notEqual( result.indexOf( "body{font-weight: bold;}" ), -1 );
+                    done();
+                } );
+            } );
+
+            it( "should resolve absolute links without a protocol (//) on an external domain", function ( done )
+            {
+                inline.html( {
+                    fileContent: "<link href=\"//example-external.com/css/simple.css\" rel=\"stylesheet\"/>",
+                    relativeTo: baseUrl,
+                    links: true
+                }, function(err, result)
+                {
+                    if ( err )
+                    {
+                        throw err;
+                    }
+                    assert.notEqual( result.indexOf( "body{font-weight: bold;}" ), -1 );
+                    done();
+                } );
             } );
         } );
 
