@@ -14,26 +14,45 @@ var readFile = require( "./lib/util").readFile;
 describe( "local", function()
 {
     var rootBaseUrl = "http://example.com/";
+    var rootExternalBaseUrl = "http://example-external.com/"
     var baseUrl;
+    var externalBaseUrl;
 
     beforeEach( function()
     {
         baseUrl = rootBaseUrl;
+        externalBaseUrl = rootExternalBaseUrl;
 
         fauxJax.install();
         fauxJax.on( "request", function( request )
         {
-            assert.equal( request.requestURL.indexOf( rootBaseUrl ), 0 );
+            var localPathIndex = (request.requestURL.indexOf( rootBaseUrl ) !== -1)
+                && rootBaseUrl.length;
 
-            var relativePath = request.requestURL.slice( rootBaseUrl.length ).replace( /\?.*/, "" );
+            var externalPathIndex = (request.requestURL.indexOf( externalBaseUrl ) !== -1)
+                && externalBaseUrl.length;
+
+            if (!localPathIndex && !externalPathIndex)
+            {
+                throw new Error( "fauxJax requestURL did not contain local or external domain" );
+            }
+
+            var relativePath = request.requestURL
+                .slice( localPathIndex || externalPathIndex )
+                .replace( /\?.*/, "" );
 
             var headers = {
                 "Content-Type": mime.contentType( path.extname( relativePath ) ) || "application/octet-stream"
             };
 
+            var storageDir = localPathIndex ? "test/cases/" : "test/cases/external/";
+
             try
             {
-                var content = fs.readFileSync( "test/cases/" + relativePath );
+                console.log('reading file ' + (storageDir + relativePath))
+                var content = fs.readFileSync( storageDir + relativePath );
+                console.log('responding with content')
+                console.log(content)
                 request.respond( 200, headers, content );
             }
             catch ( err )
@@ -174,6 +193,36 @@ describe( "local", function()
                     if (err) {
                         throw err;
                     }
+                });
+            } );
+
+            it( "should resolve relative images in stylesheets that are on a different domain", function ( done )
+            {
+                var expected = readFile( "test/cases/stylesheet-external-domain_out.html" );
+
+                inline.html( {
+                    fileContent: readFile( "test/cases/stylesheet-external-domain.html" ),
+                    relativeTo: baseUrl,
+                    links: true,
+                    images: true
+                }, function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                });
+            } );
+
+            it( "should resolve root (/) relative images in stylesheets that are on a different domain", function ( done )
+            {
+                var expected = readFile( "test/cases/stylesheet-external-domain_out.html" );
+
+                inline.html( {
+                    fileContent: readFile( "test/cases/stylesheet-external-domain-root.html" ),
+                    relativeTo: baseUrl,
+                    links: true,
+                    images: true
+                }, function( err, result )
+                {
+                    testEquality( err, result, expected, done );
                 });
             } );
         } );

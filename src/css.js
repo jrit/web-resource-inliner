@@ -3,6 +3,7 @@
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var path = require( "path" );
+var url = require( "url" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
@@ -39,7 +40,16 @@ module.exports = function( options, callback )
 
     var rebase = function( src )
     {
-        var resolved = src.charAt(0) === '/' ? src : path.join( settings.rebaseRelativeTo, src );
+        var resolved;
+        if ( inline.isRemotePath( settings.rebaseRelativeTo ) )
+        {
+            resolved = url.resolve( settings.rebaseRelativeTo, src );
+        }
+        else
+        {
+            resolved = src.charAt(0) === '/' ? src : path.join( settings.rebaseRelativeTo, src );
+        }
+        console.log(`rebased src from ${src} to ${resolved} with rebaseRelativeTo ${settings.rebaseRelativeTo}`)
         var css = "url(\"" + resolved.replace( /\\/g, "/" ) + "\")";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\)", "g" );
         result = result.replace( re, () => css );

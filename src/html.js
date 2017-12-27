@@ -85,14 +85,24 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
-                var absSrc = inline.isRemotePath( args.src )
-                    ? args.src
-                    : url.resolve( settings.relativeTo, args.src );
-
-                var rebaseRelativeTo = settings.rebaseRelativeTo || path.relative(
-                    settings.relativeTo,
-                    path.dirname( absSrc )
-                );
+                // if the source is a remote path, we can rebase directly to its root
+                // this ensures that stylesheets on external domains can also be resolved to
+                var rebaseRelativeTo = settings.rebaseRelativeTo;
+                if (!rebaseRelativeTo)
+                {
+                    if ( inline.isRemotePath( args.src ) )
+                    {
+                        rebaseRelativeTo = path.dirname( args.src );
+                    }
+                    else
+                    {
+                        var absSrc = url.resolve( settings.relativeTo, args.src );
+                        rebaseRelativeTo = path.relative(
+                            settings.relativeTo,
+                            path.dirname( absSrc )
+                        );
+                    }
+                }
 
                 var cssOptions = xtend( {}, settings, {
                     fileContent: content.toString(),
@@ -100,8 +110,6 @@ module.exports = function( options, callback )
                 } );
 
                 console.log(` found css file with
-                    absSrc ${absSrc}
-                    dirname of absSrc ${path.dirname(absSrc)}
                     src ${args.src}
                     relativeTo ${settings.relativeTo}
                     rebaseRelativeTo ${rebaseRelativeTo}
