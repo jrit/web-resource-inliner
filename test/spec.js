@@ -49,10 +49,7 @@ describe( "local", function()
 
             try
             {
-                console.log('reading file ' + (storageDir + relativePath))
                 var content = fs.readFileSync( storageDir + relativePath );
-                console.log('responding with content')
-                console.log(content)
                 request.respond( 200, headers, content );
             }
             catch ( err )
