@@ -109,12 +109,6 @@ module.exports = function( options, callback )
                     rebaseRelativeTo: rebaseRelativeTo
                 } );
 
-                console.log(` found css file with
-                    src ${args.src}
-                    relativeTo ${settings.relativeTo}
-                    rebaseRelativeTo ${rebaseRelativeTo}
-                `)
-
                 css( cssOptions, function( err, content )
                 {
                     if( err )
