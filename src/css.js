@@ -49,7 +49,6 @@ module.exports = function( options, callback )
         {
             resolved = src.charAt(0) === '/' ? src : path.join( settings.rebaseRelativeTo, src );
         }
-        console.log(`rebased src from ${src} to ${resolved} with rebaseRelativeTo ${settings.rebaseRelativeTo}`)
         var css = "url(\"" + resolved.replace( /\\/g, "/" ) + "\")";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\)", "g" );
         result = result.replace( re, () => css );
