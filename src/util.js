@@ -7,6 +7,7 @@ var fs = require( "fs" );
 var request = require( "request" );
 var chalk = require( "chalk" );
 var validDataUrl = require( "valid-data-url" );
+var Buffer = require( "safer-buffer" ).Buffer;
 
 var util = {};
 
@@ -120,7 +121,7 @@ function getRemote( uri, settings, callback, toDataUri )
 
             if( toDataUri )
             {
-                var b64 = new Buffer( body.toString(), "binary" ).toString( "base64" );
+                var b64 = Buffer.from( body.toString(), "binary" ).toString( "base64" );
                 var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
                 return callback( null, datauriContent );
             }

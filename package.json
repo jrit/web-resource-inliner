@@ -5,7 +5,7 @@
   },
   "name": "web-resource-inliner",
   "description": "Inlines img, script and link tags into the same file.",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "keywords": [
     "inline",
     "js",
@@ -37,6 +37,7 @@
     "htmlparser2": "^3.9.2",
     "lodash.unescape": "^4.0.1",
     "request": "^2.78.0",
+    "safer-buffer": "^2.1.2",
     "valid-data-url": "^0.1.4",
     "xtend": "^4.0.0"
   },

@@ -1,5 +1,8 @@
 ## Release History
 
+### 2019-03-18 *v4.3.0*
+Add: Skip inlining links that start with a `#`
+
 ### 2017-09-06 *v4.2.1*
 Fixes: handling of empty srcs
 

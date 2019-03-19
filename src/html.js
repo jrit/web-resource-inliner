@@ -190,7 +190,7 @@ module.exports = function( options, callback )
             ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             var src = unescape( found[ 2 ] ).trim();
-            if (src)
+            if ( src )
             {
                 tasks.push( replaceScript.bind(
                 {
@@ -211,7 +211,7 @@ module.exports = function( options, callback )
             ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             var src = unescape( found[ 2 ] ).trim();
-            if (src)
+            if ( src && src.indexOf( "#" ) !== 0 )
             {
                 tasks.push( replaceLink.bind(
                 {
@@ -231,7 +231,7 @@ module.exports = function( options, callback )
             ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
             var src = unescape( found[ 2 ] ).trim();
-            if (src) {
+            if ( src ) {
                 tasks.push( replaceImg.bind(
                 {
                     element: found[ 0 ],

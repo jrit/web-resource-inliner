@@ -57,7 +57,7 @@ function testEquality( err, result, expected, done )
 
 describe( "html", function()
 {
-    this.timeout(5000);
+    this.timeout( 5000 );
 
     describe( "links", function()
     {
@@ -523,6 +523,21 @@ describe( "html", function()
             );
         } );
 
+        it( "should not try to inline a link that starts with #", function( done )
+        {
+            const content = '<link href="#" rel="stylesheet" /><link href="#aaa" rel="stylesheet" />';
+
+            inline.html( {
+                    fileContent: content,
+                    strict: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, content, done );
+                }
+            );
+        } );
+
         it( "should use the base url (relativeTo) to resolve image URLs", function( done )
         {
             var expected = readFile( "test/cases/img_out.html" );
@@ -597,7 +612,7 @@ describe( "html", function()
 
 describe( "css", function()
 {
-    this.timeout(5000);
+    this.timeout( 5000 );
 
     it( "should inline local urls", function( done )
     {
