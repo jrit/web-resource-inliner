@@ -525,7 +525,9 @@ describe( "html", function()
 
         it( "should not try to inline a link that starts with #", function( done )
         {
-            const content = '<link href="#" rel="stylesheet" /><link href="#aaa" rel="stylesheet" />';
+            const content = '<link href="#" rel="stylesheet" /><link href="#aaa" rel="stylesheet" />'
+              + '<img src="#" /><img src="#aaa" />'
+              + '<a href="#" /><a href="#aaa" />';
 
             inline.html( {
                     fileContent: content,
