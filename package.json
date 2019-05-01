@@ -22,7 +22,7 @@
     "url": "https://github.com/jrit/web-resource-inliner.git"
   },
   "engines": {
-    "node": ">=4.2.0"
+    "node": ">=6.9.0"
   },
   "devDependencies": {
     "faux-jax": "^5.0.5",
