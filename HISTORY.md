@@ -1,5 +1,8 @@
 ## Release History
 
+### 2019-03-18 *v4.3.2*
+Add: Update datauri
+
 ### 2019-03-18 *v4.3.0*
 Add: Skip inlining links that start with a `#`
 
