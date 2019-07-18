@@ -31,7 +31,7 @@
     "mocha": "^6.1.4"
   },
   "dependencies": {
-    "async": "^2.1.2",
+    "async": "^2.6.3",
     "chalk": "^1.1.3",
     "datauri": "^2.0.0",
     "htmlparser2": "^3.9.2",
