@@ -1,5 +1,6 @@
 "use strict";
 
+var url = require( "url" );
 var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var path = require( "path" );
@@ -39,7 +40,7 @@ module.exports = function( options, callback )
 
     var rebase = function( src )
     {
-        var css = "url(\"" + path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) + "\")";
+        var css = "url(\"" + ( inline.isRemotePath( src ) || inline.isRemotePath( settings.rebaseRelativeTo ) ? url.resolve( settings.rebaseRelativeTo, src ) : path.join( settings.rebaseRelativeTo, src ).replace( /\\/g, "/" ) ) + "\")";
         var re = new RegExp( "url\\(\\s?[\"']?(" + inline.escapeSpecialChars( src ) + ")[\"']?\\s?\\)", "g" );
         result = result.replace( re, () => css );
     };
