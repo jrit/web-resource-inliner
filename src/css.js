@@ -1,14 +1,13 @@
 "use strict";
 
 var url = require( "url" );
-var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var path = require( "path" );
 var inline = require( "./util" );
 
 module.exports = function( options, callback )
 {
-    var settings = xtend( {}, inline.defaults, options );
+    var settings = Object.assign( {}, inline.defaults, options );
 
     var replaceUrl = function( callback )
     {
