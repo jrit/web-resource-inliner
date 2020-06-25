@@ -589,25 +589,27 @@ describe( "html", function()
             } );
         } );
 
-        it( "should apply the requestTransform option", function( done )
+        it( "should apply the requestResource option", function( done )
         {
-            fauxJax.on( "request", function( request )
-            {
-                assert( request.requestURL.indexOf( "foo=bar" ) !== -1 );
-            } );
+            var uris = []
             inline.html( {
                 fileContent: "<img src=\"assets/icon.png\"><img src=\"assets/icon.png?a=1\">",
                 relativeTo: baseUrl,
                 scripts: true,
                 links: true,
                 images: true,
-                requestTransform: function( options )
+                requestResource: function( options, callback )
                 {
-                    options.qs = {
-                        foo: "bar"
-                    };
+                    uris.push( options.uri )
+                    callback( null, "image" )
                 }
-            }, done );
+            }, function()
+            {
+                assert.equal( uris.length, 2 );
+                assert.equal( uris[0], "http://example.com/assets/icon.png" );
+                assert.equal( uris[1], "http://example.com/assets/icon.png?a=1" );
+                done()
+            } );
         } );
     } );
 } );

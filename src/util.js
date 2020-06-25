@@ -4,7 +4,7 @@ var path = require( "path" );
 var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
-var request = require( "request" );
+var fetch = require( "node-fetch" );
 var colors = require( "ansi-colors" );
 var validDataUrl = require( "valid-data-url" );
 var Buffer = require( "safer-buffer" ).Buffer;
@@ -23,7 +23,7 @@ util.defaults = {
     rebaseRelativeTo: "",
     inlineAttribute: "data-inline",
     fileContent: "",
-    requestTransform: undefined,
+    requestResource: undefined,
     scriptTransform: undefined,
     linkTransform: undefined
 };
@@ -79,6 +79,39 @@ util.getAttrs = function( tagMarkup, settings )
     }
 };
 
+function defaultRequestResource( requestOptions, callback )
+{
+    var fetchOptions = {
+        method: 'GET',
+        compress: requestOptions.gzip
+    }
+    fetch( requestOptions.uri, fetchOptions )
+        .then( function( response ) {
+            if( response.status !== 200 )
+            {
+                throw new Error( requestOptions.uri + " returned http " + response.status );
+            }
+            if( requestOptions.encoding === 'binary' )
+            {
+                return response.buffer()
+                    .then( function( body ) {
+                        var b64 = body.toString( "base64" );
+                        var datauriContent = "data:" + response.headers.get( "content-type" ) + ";base64," + b64;
+                        return datauriContent;
+                    } );
+            }
+            else
+            {
+                return response.text();
+            }
+        } )
+        .then( function( body ) {
+            callback( null, body );
+        }, function( err ) {
+            callback( err );
+        } )
+}
+
 function getRemote( uri, settings, callback, toDataUri )
 {
     if( /^\/\//.test( uri ) )
@@ -92,44 +125,13 @@ function getRemote( uri, settings, callback, toDataUri )
         gzip: true
     };
 
-    if( typeof settings.requestTransform === "function" )
+    var requestResource = defaultRequestResource;
+    if( typeof settings.requestResource === "function" )
     {
-        var transformedOptions = settings.requestTransform( requestOptions );
-        if( transformedOptions === false )
-        {
-            return callback();
-        }
-        if( transformedOptions === undefined )
-        {
-            return callback( new Error( uri + " requestTransform returned `undefined`" ) );
-        }
-        requestOptions = transformedOptions || requestOptions;
+        requestResource = settings.requestResource;
     }
 
-    request(
-        requestOptions,
-        function( err, response, body )
-        {
-            if( err )
-            {
-                return callback( err );
-            }
-            else if( response.statusCode !== 200 )
-            {
-                return callback( new Error( uri + " returned http " + response.statusCode ) );
-            }
-
-            if( toDataUri )
-            {
-                var b64 = Buffer.from( body.toString(), "binary" ).toString( "base64" );
-                var datauriContent = "data:" + response.headers[ "content-type" ] + ";base64," + b64;
-                return callback( null, datauriContent );
-            }
-            else
-            {
-                return callback( null, body );
-            }
-        } );
+    requestResource( requestOptions, callback );
 }
 
 util.getInlineFilePath = function( src, relativeTo )
