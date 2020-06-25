@@ -7,7 +7,6 @@ var fs = require( "fs" );
 var request = require( "request" );
 var chalk = require( "chalk" );
 var validDataUrl = require( "valid-data-url" );
-var Buffer = require( "safer-buffer" ).Buffer;
 
 var util = {};
 
