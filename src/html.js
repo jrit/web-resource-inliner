@@ -2,7 +2,6 @@
 
 var path = require( "path" );
 var unescape = require( "lodash.unescape" );
-var parallel = require( "async" ).parallel;
 var inline = require( "./util" );
 var css = require( "./css" );
 var htmlparser = require( "htmlparser2" );
@@ -261,8 +260,27 @@ module.exports = function( options, callback )
 
     result = replaceInlineAttribute( result );
 
-    parallel( tasks, function( err )
+    var promises = tasks.map( function( fn )
     {
-        callback( err, result );
+        return new Promise( function( resolve, reject )
+        {
+            fn( function( error )
+            {
+                if ( error ) {
+                    reject ( error );
+                } else {
+                    resolve();
+                }
+            } );
+        } );
     } );
+
+    Promise.all( promises )
+        .then( function()
+        {
+            callback( null, result );
+        }, function( error )
+        {
+            callback( error, result );
+        } );
 };

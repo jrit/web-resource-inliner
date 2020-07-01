@@ -1,7 +1,6 @@
 "use strict";
 
 var url = require( "url" );
-var parallel = require( "async" ).parallel;
 var path = require( "path" );
 var inline = require( "./util" );
 
@@ -90,8 +89,27 @@ module.exports = function( options, callback )
         index = found.index + index + 1;
     }
 
-    parallel( tasks, function( err )
+    var promises = tasks.map( function( fn )
     {
-        callback( err, result );
+        return new Promise( function( resolve, reject )
+        {
+            fn( function( error )
+            {
+                if ( error ) {
+                    reject ( error );
+                } else {
+                    resolve();
+                }
+            } );
+        } );
     } );
+
+    Promise.all( promises )
+        .then( function()
+        {
+            callback( null, result );
+        }, function( error )
+        {
+            callback( error, result );
+        } );
 };
