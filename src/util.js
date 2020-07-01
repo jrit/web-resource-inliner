@@ -7,7 +7,6 @@ var fs = require( "fs" );
 var fetch = require( "node-fetch" );
 var colors = require( "ansi-colors" );
 var validDataUrl = require( "valid-data-url" );
-var Buffer = require( "safer-buffer" ).Buffer;
 
 var util = {};
 
