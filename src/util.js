@@ -5,7 +5,7 @@ var url = require( "url" );
 var datauri = require( "datauri" );
 var fs = require( "fs" );
 var request = require( "request" );
-var chalk = require( "chalk" );
+var colors = require( "ansi-colors" );
 var validDataUrl = require( "valid-data-url" );
 var Buffer = require( "safer-buffer" ).Buffer;
 
@@ -205,7 +205,7 @@ util.handleReplaceErr = function( err, src, strict, callback )
     }
     else
     {
-        console.warn( chalk.yellow( "Not found, skipping: " + src ) );
+        console.warn( colors.yellow( "Not found, skipping: " + src ) );
         return callback( null );
     }
 };
