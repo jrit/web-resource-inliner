@@ -2,7 +2,6 @@
 
 var path = require( "path" );
 var unescape = require( "lodash.unescape" );
-var xtend = require( "xtend" );
 var parallel = require( "async" ).parallel;
 var inline = require( "./util" );
 var css = require( "./css" );
@@ -10,7 +9,7 @@ var htmlparser = require( "htmlparser2" );
 
 module.exports = function( options, callback )
 {
-    var settings = xtend( {}, inline.defaults, options );
+    var settings = Object.assign( {}, inline.defaults, options );
 
     function replaceInlineAttribute( string )
     {
@@ -84,7 +83,7 @@ module.exports = function( options, callback )
                     return callback( null );
                 }
 
-                var cssOptions = xtend( {}, settings, {
+                var cssOptions = Object.assign( {}, settings, {
                     fileContent: content.toString(),
                     rebaseRelativeTo: inline.isRemotePath( args.src ) && !inline.isRemotePath( settings.relativeTo ) ? args.src : path.relative( settings.relativeTo, settings.rebaseRelativeTo || path.join( settings.relativeTo, args.src, ".." + path.sep ) )
                 } );
