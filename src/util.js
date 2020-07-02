@@ -187,8 +187,15 @@ util.getFileReplacement = function( src, settings, callback )
     }
     else
     {
-        var result = ( new datauri( util.getInlineFilePath( src, settings.relativeTo ) ) ).content;
-        callback( result === undefined ? new Error( "Local file not found" ) : null, result );
+        datauri( util.getInlineFilePath( src, settings.relativeTo ) )
+            .then( function( result )
+            {
+                callback( result === undefined ? new Error( "Local file not found" ) : null, result );
+            } )
+            .catch( function( error )
+            {
+                callback( error );
+            } );
     }
 };
 

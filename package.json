@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
-    "datauri": "^2.0.0",
+    "datauri": "^3.0.0",
     "htmlparser2": "^4.0.0",
     "lodash.unescape": "^4.0.1",
     "request": "^2.88.0",
