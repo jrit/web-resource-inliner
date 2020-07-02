@@ -2,10 +2,10 @@
 
 var path = require( "path" );
 var url = require( "url" );
-var datauri = require( "datauri" );
 var fs = require( "fs" );
 var fetch = require( "node-fetch" );
 var colors = require( "ansi-colors" );
+var mime = require( 'mime' );
 var validDataUrl = require( "valid-data-url" );
 
 var util = {};
@@ -188,8 +188,11 @@ util.getFileReplacement = function( src, settings, callback )
     }
     else
     {
-        var result = ( new datauri( util.getInlineFilePath( src, settings.relativeTo ) ) ).content;
-        callback( result === undefined ? new Error( "Local file not found" ) : null, result );
+        var fileName = util.getInlineFilePath( src, settings.relativeTo );
+        var mimetype = mime.getType( fileName );
+        var base64 = fs.readFileSync( fileName, 'base64' );
+        var datauri = `data:${mimetype};base64,${base64}`;
+        callback( null, datauri );
     }
 };
 
