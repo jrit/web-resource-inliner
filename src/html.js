@@ -1,7 +1,7 @@
 "use strict";
 
 var path = require( "path" );
-var unescape = require( "lodash.unescape" );
+var { htmlUnescape } = require( "escape-goat" );
 var inline = require( "./util" );
 var css = require( "./css" );
 var htmlparser = require( "htmlparser2" );
@@ -187,7 +187,7 @@ module.exports = function( options, callback )
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.scripts || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
-            var src = unescape( found[ 2 ] ).trim();
+            var src = htmlUnescape( found[ 2 ] ).trim();
             if ( src && src.indexOf( "#" ) !== 0 )
             {
                 tasks.push( replaceScript.bind(
@@ -208,7 +208,7 @@ module.exports = function( options, callback )
             relStylesheetAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.links || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
-            var src = unescape( found[ 2 ] ).trim();
+            var src = htmlUnescape( found[ 2 ] ).trim();
             if ( src && src.indexOf( "#" ) !== 0 )
             {
                 tasks.push( replaceLink.bind(
@@ -228,7 +228,7 @@ module.exports = function( options, callback )
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
             ( settings.images || inlineAttributeRegex.test( found[ 0 ] ) ) )
         {
-            var src = unescape( found[ 2 ] ).trim();
+            var src = htmlUnescape( found[ 2 ] ).trim();
             if ( src && src.indexOf( "#" ) !== 0 ) {
                 tasks.push( replaceImg.bind(
                 {
@@ -250,10 +250,10 @@ module.exports = function( options, callback )
             tasks.push( replaceSvg.bind(
             {
                 element: found[ 0 ],
-                src: unescape( found[ 2 ] ).trim(),
+                src: htmlUnescape( found[ 2 ] ).trim(),
                 attrs: inline.getAttrs( found[ 0 ], settings ),
                 limit: settings.svgs,
-                id: unescape( found[ 3 ] ).trim()
+                id: htmlUnescape( found[ 3 ] ).trim()
             } ) );
         }
     }
