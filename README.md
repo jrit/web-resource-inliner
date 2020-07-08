@@ -67,8 +67,8 @@ Describes the path relationship between CSS content and the context it will be l
 #### `strict`, Boolean, default `false`
 When strict is `true`, a missing resource will cause the inliner to halt and return an error in the callback. The default behavior is to log a warning to the console and continue inlining with the available resources, which is more similar to how a web page behaves.
 
-#### `requestTransform`, Function, default `undefined`
-Allows to adjust issued requests. E.g., add authentication tokens to requested URLs. The function is called with the request options object as its parameter. It can modify this object or return a new one. See [the list of available options](https://www.npmjs.com/package/request#request-options-callback).
+#### `requestResource`, Function, default `undefined`
+Allows to adjust issued requests. E.g., add authentication tokens to requested URLs. The function is called with `{ uri, encoding, gzip }` object as its parameter. It can replace builtin [node-fetch](https://github.com/node-fetch/node-fetch) with your own solution.
 
 #### `scriptTransform`, Function( content, callback ), default `undefined`
 Allows to make changes to scripts before they are inlined, such as minifying. Callback is standard node error first, second argument is transformed value.
