@@ -190,9 +190,10 @@ util.getFileReplacement = function( src, settings, callback )
     {
         var fileName = util.getInlineFilePath( src, settings.relativeTo );
         var mimetype = mime.getType( fileName );
-        var base64 = fs.readFileSync( fileName, 'base64' );
-        var datauri = `data:${mimetype};base64,${base64}`;
-        callback( null, datauri );
+        fs.readFile( fileName, 'base64', function( err, base64 ) {
+            var datauri = `data:${mimetype};base64,${base64}`;
+            callback( err, datauri );
+        } );
     }
 };
 
