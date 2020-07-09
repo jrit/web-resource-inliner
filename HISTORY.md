@@ -1,5 +1,10 @@
 ## Release History
 
+### 2020-07-09 *v5.0.0*
+Breaking: requires node v10 to support dependency updates (previous required node 6.9+)
+Breaking: `requestTransform` replaced with `requestResource` due to change from npm lib request to node-fetch
+Credit to TrySound for changes
+
 ### 2019-03-18 *v4.3.2*
 Add: Update datauri
 
