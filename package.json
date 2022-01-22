@@ -38,7 +38,7 @@
     "escape-goat": "^3.0.0",
     "htmlparser2": "^5.0.0",
     "mime": "^2.4.6",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.1.1",
     "valid-data-url": "^3.0.0"
   },
   "scripts": {
