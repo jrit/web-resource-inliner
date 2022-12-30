@@ -31,7 +31,7 @@
     "faux-jax": "^5.0.6",
     "istanbul": "^0.4.5",
     "mime-types": "^2.1.25",
-    "mocha": "^6.2.2"
+    "mocha": "^10.2.0"
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
