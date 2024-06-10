@@ -5,8 +5,10 @@ var fs = require( "fs" );
 var path = require( "path" );
 var inline = require( "../src/inline.js" );
 var util = require( "../src/util.js" );
-var fauxJax = require( "faux-jax" );
+const fetchMock = require('fetch-mock');
 var mime = require( "mime-types" );
+
+fetchMock.config.overwriteRoutes = true;
 
 function normalize( contents )
 {
@@ -489,22 +491,26 @@ describe( "html", function()
 
         beforeEach( function()
         {
-            fauxJax.install();
-            fauxJax.on( "request", function( request )
-            {
-                assert.equal( request.requestURL.indexOf( baseUrl ), 0 );
-                var relativePath = request.requestURL.slice( baseUrl.length ).replace( /\?.*/, "" );
+            fetchMock.mock('*', (url, opts) => {
+                assert.equal( url.indexOf( baseUrl ), 0 );
+
+                var relativePath = url.slice(baseUrl.length).replace(/\?.*/, "");
                 var headers = {
-                    "Content-Type": mime.contentType( path.extname( relativePath ) ) || "application/octet-stream"
+                    "Content-Type": mime.contentType(path.extname(relativePath)) || "application/octet-stream"
                 };
-                var content = fs.readFileSync( "test/cases/" + relativePath );
-                request.respond( 200, headers, content );
-            } );
+
+                var content =  fs.readFileSync("test/cases/" + relativePath);
+
+                return new Response(content, {
+                    status: 200,
+                    headers: headers
+                });
+            });
         } );
 
         afterEach( function()
         {
-            fauxJax.restore();
+            fetchMock.restore();
         } );
 
         it( "should not try to inline empty links", function( done )
@@ -555,10 +561,14 @@ describe( "html", function()
 
         it( "should unescape HTML entities when extracting URLs from attributes", function( done )
         {
-            fauxJax.on( "request", function( request )
-            {
-                assert( !/&\w+;/.test( request.url ) );
-            } );
+            fetchMock.mock('*', (url, opts) => {
+                assert( !/&\w+;/.test( url ) );
+
+                return new Response(null, {
+                    status: 200,
+                });
+            });
+
             inline.html( {
                 fileContent: "<img src=\"assets/icon.png?a=b&amp;c='d'\" /><img src=\"assets/icon.png?a=b&amp;c='d'&amp;&amp;\">",
                 relativeTo: baseUrl,
@@ -569,10 +579,14 @@ describe( "html", function()
         it( "should understand the spaces to the sides of = when parsing attributes", function( done )
         {
             var count = 0;
-            fauxJax.on( "request", function( request )
-            {
-                count++;
-            } );
+
+            fetchMock.mock('*', (url, opts) => {
+                count++
+
+                return new Response(null, {
+                    status: 200,
+                });
+            });
             inline.html( {
                 fileContent: "<img src = \"assets/icon.png\">" +
                     "<script src =\"assets/export.js\"></script>" +
