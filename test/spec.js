@@ -501,11 +501,12 @@ describe( "html", function()
 
                 var content =  fs.readFileSync("test/cases/" + relativePath);
 
-                return new Response(content, {
+                return {
                     status: 200,
-                    headers: headers
-                });
-            });
+                    headers: headers,
+                    body:  content
+                };
+            }, { sendAsJson: false });
         } );
 
         afterEach( function()
