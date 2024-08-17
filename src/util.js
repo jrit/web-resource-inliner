@@ -3,7 +3,6 @@
 var path = require( "path" );
 var url = require( "url" );
 var fs = require( "fs" );
-var fetch = require( "node-fetch" );
 var colors = require( "ansi-colors" );
 var mime = require( 'mime' );
 var validDataUrl = require( "valid-data-url" );
@@ -92,7 +91,10 @@ function defaultRequestResource( requestOptions, callback )
             }
             if( requestOptions.encoding === 'binary' )
             {
-                return response.buffer()
+                return response.arrayBuffer()
+                    .then( function( arrayBuffer ) {
+                        return Buffer.from(arrayBuffer);
+                    } )
                     .then( function( body ) {
                         var b64 = body.toString( "base64" );
                         var datauriContent = "data:" + response.headers.get( "content-type" ) + ";base64," + b64;

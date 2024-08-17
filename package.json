@@ -28,7 +28,7 @@
     "node": ">=10.0.0"
   },
   "devDependencies": {
-    "faux-jax": "^5.0.6",
+    "fetch-mock": "^9.11.0",
     "istanbul": "^0.4.5",
     "mime-types": "^2.1.25",
     "mocha": "^6.2.2"
@@ -38,7 +38,6 @@
     "escape-goat": "^3.0.0",
     "htmlparser2": "^5.0.0",
     "mime": "^2.4.6",
-    "node-fetch": "^2.6.0",
     "valid-data-url": "^3.0.0"
   },
   "scripts": {
