@@ -16,6 +16,7 @@ util.defaults = {
     svgs: 8,
     scripts: true,
     links: true,
+    imports: false,
     strict: false,
     relativeTo: "",
     rebaseRelativeTo: "",
@@ -27,6 +28,10 @@ util.defaults = {
 };
 
 util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
+util.CSSImportRegex = new RegExp(
+    '@import\\s+(?<urlExpr>(["\'])(?<url>.+?)(?<!\\\\)\\2|(?:src|url)\\(\\s*(["\'])(?<url>.+?)(?<!\\\\)\\4\\s*\\))(?<rest>[^;]*);.*$',
+    "im"
+);
 
 /**
  * Escape special regex characters of a particular string
@@ -215,4 +220,88 @@ util.handleReplaceErr = function( err, src, strict, callback )
         console.warn( colors.yellow( "Not found, skipping: " + src ) );
         return callback( null );
     }
+};
+
+function substrInsideBalancedParentheses( str )
+{
+    var stack = [];
+    var result = "";
+    for( var i = 0; i < str.length; i++ )
+    {
+        switch( str[ i ] )
+        {
+        case "(":
+            stack.push( "(" );
+            if( stack.length > 1 )
+            {
+                result += str[ i ];
+            }
+            break;
+        case ")":
+            if( stack[ stack.length - 1 ] === "(" )
+            {
+                stack.pop();
+                if( !stack.length )
+                {
+                    return result;
+                }
+                result += str[ i ];
+            }
+            else
+            {
+                //not balanced!
+                return false;
+            }
+            break;
+        default:
+            if( stack.length )
+            {
+                result += str[ i ];
+            }
+        }
+    }
+    return result;
+}
+
+util.parseCSSImportRule = function( rule )
+{
+    var matches = util.CSSImportRegex.exec( rule );
+
+    if( !matches || !matches.groups.url )
+    {
+        return null;
+    }
+
+    var rest = ( matches.groups.rest || "" ).trim();
+    var layer = "";
+    var found = /^(?<layerExpr>layer(?:\s*\((?<layerName>[^)]*)\))?)/ims.exec( rest );
+    if( found )
+    {
+        layer = ( found.groups.layerName || "" ).trim() || true;
+        rest = rest.substring( found.index + found[ 0 ].length ).trim();
+    }
+
+    var supports = "";
+    if( /^supports\(/i.test( rest ) )
+    {
+        // supports(...) can't be extracted using RegEx due to nested parentheses
+        var expr = substrInsideBalancedParentheses( rest );
+        if( expr === false )
+        {
+            rest = ""; // ignore rest of the malformed rule
+        }
+        else
+        {
+            supports = expr.trim();
+            rest = rest.replace( expr, "" ).replace( /supports\([^)]*\)/i, "" );
+        }
+    }
+    var media = rest.replace( /\s*;.*$/m, "" ).trim();
+
+    return {
+        url: matches.groups.url,
+        layer: layer || null,
+        supports: supports || null,
+        media: media || null
+    };
 };
