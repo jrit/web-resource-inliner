@@ -189,6 +189,25 @@ describe( "html", function()
 
     } );
 
+    describe( "css imports", function()
+    {
+        it( "should inline @import rules inside stylesheets", function( done )
+        {
+            var expected = readFile( "test/cases/css-import_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-import.html" ),
+                    relativeTo: "test/cases/",
+                    imports: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+    } );
+
     describe( "scripts", function()
     {
         it( "should inline scripts", function( done )

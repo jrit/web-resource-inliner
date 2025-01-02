@@ -79,6 +79,10 @@ util.getAttrs = function( tagMarkup, settings )
         {
             return attrs.replace( /(href|rel)=["'][^"']*["']/g, "" ).trim();
         }
+        else if( tag === "<style" )
+        {
+            return attrs.trim();
+        }
     }
 };
 

@@ -110,6 +110,48 @@ module.exports = function( options, callback )
         } );
     };
 
+    var replaceStylesheet = function( callback )
+    {
+        var args = this;
+
+        var onTransform = function( err, content )
+        {
+            if( err )
+            {
+                return callback( err );
+            }
+
+            if( !content || typeof( args.limit ) === "number" && content.length > args.limit * 1000 )
+            {
+                return callback( null );
+            }
+
+            var cssOptions = Object.assign( {}, settings, {
+                fileContent: content.toString()
+            } );
+
+            css( cssOptions, function( err, content )
+            {
+                if( err )
+                {
+                    return callback( err );
+                }
+                var html = content.toString();
+                html = html.replace( /<\/script>/gmi, "<\\/script>" );
+                html = "<style" + ( args.attrs ? " " + args.attrs : "" ) + ">" + html.replace( /\/\*[\s]*--[\s]*>*/gm, "/* - ->" ) + "</style>";
+                var re = new RegExp( inline.escapeSpecialChars( args.element ), "g" );
+                result = result.replace( re, () => html );
+                return callback( null );
+            } );
+        };
+
+        if( options.styleTransform )
+        {
+            return options.styleTransform( args.src, onTransform );
+        }
+        onTransform(null, args.src );
+    };
+
     var replaceImg = function( callback )
     {
         var args = this;
@@ -219,6 +261,22 @@ module.exports = function( options, callback )
                     limit: settings.links
                 } ) );
             }
+        }
+    }
+
+    var styleRegex = /<style\b[\s\S]+?(?:\btype\s*=\s*("|')text\/css\1)?[\s\S]*?>([\s\S]*?)<\/style>/gm
+    while( ( found = styleRegex.exec( result ) ) !== null )
+    {
+        if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
+            ( settings.imports || inlineAttributeRegex.test( found[ 0 ] ) ) )
+        {
+            tasks.push( replaceStylesheet.bind(
+                {
+                    element: found[ 0 ],
+                    src: found[ 2 ],
+                    attrs: inline.getAttrs( found[ 0 ], settings ),
+                    limit: settings.imports
+                } ) );
         }
     }
 
