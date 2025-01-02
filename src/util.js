@@ -29,7 +29,7 @@ util.defaults = {
 
 util.attrValueExpression = "(=[\"']([^\"']+?)[\"'])?";
 util.CSSImportRegex = new RegExp(
-    '@import\\s+(?<urlExpr>(["\'])(?<url>.+?)(?<!\\\\)\\2|(?:src|url)\\(\\s*(["\'])(?<url>.+?)(?<!\\\\)\\4\\s*\\))(?<rest>[^;]*);.*$',
+    '@import\\s+(?<urlExpr>(["\'])(?<url>.+?)(?<!\\\\)\\2|(?:src|url)\\(\\s*(["\'])(?<url2>.+?)(?<!\\\\)\\4\\s*\\))(?<rest>[^;]*);.*$',
     "im"
 );
 
@@ -271,7 +271,7 @@ util.parseCSSImportRule = function( rule )
 {
     var matches = util.CSSImportRegex.exec( rule );
 
-    if( !matches || !matches.groups.url )
+    if( !matches || ( !matches.groups.url && !matches.groups.url2 ) )
     {
         return null;
     }
@@ -303,7 +303,7 @@ util.parseCSSImportRule = function( rule )
     var media = rest.replace( /\s*;.*$/m, "" ).trim();
 
     return {
-        url: matches.groups.url,
+        url: matches.groups.url || matches.groups.url2,
         layer: layer || null,
         supports: supports || null,
         media: media || null

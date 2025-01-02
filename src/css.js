@@ -64,15 +64,15 @@ module.exports = function( options, callback )
 
                 var rule = inline.parseCSSImportRule( args.rule );
                 var css = content.toString();
-                if( rule.media )
+                if( rule?.media )
                 {
                     css = "@media " + rule.media + " {\n" + css + "}\n";
                 }
-                if( rule.supports )
+                if( rule?.supports )
                 {
                     css = "@supports (" + rule.supports + ") {\n" + css + "}\n";
                 }
-                if( rule.layer )
+                if( rule?.layer )
                 {
                     css = "@layer " + ( typeof( rule.layer ) === "string" ? rule.layer : "" ) + " {\n" + css + "}\n";
                 }
@@ -136,7 +136,7 @@ module.exports = function( options, callback )
             tasks.push( replaceImport.bind(
                 {
                     rule: found[ 0 ],
-                    src: found.groups.url,
+                    src: found.groups.url || found.groups.url2,
                     marker: injectMarker
                 } ) );
         }

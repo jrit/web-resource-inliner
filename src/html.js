@@ -149,7 +149,7 @@ module.exports = function( options, callback )
         {
             return options.styleTransform( args.src, onTransform );
         }
-        onTransform(null, args.src );
+        onTransform( null, args.src );
     };
 
     var replaceImg = function( callback )
@@ -264,7 +264,7 @@ module.exports = function( options, callback )
         }
     }
 
-    var styleRegex = /<style\b[\s\S]+?(?:\btype\s*=\s*("|')text\/css\1)?[\s\S]*?>([\s\S]*?)<\/style>/gm
+    var styleRegex = /<style\b[\s\S]+?(?:\btype\s*=\s*("|')text\/css\1)?[\s\S]*?>([\s\S]*?)<\/style>/gm;
     while( ( found = styleRegex.exec( result ) ) !== null )
     {
         if( !inlineAttributeIgnoreRegex.test( found[ 0 ] ) &&
