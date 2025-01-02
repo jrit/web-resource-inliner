@@ -39,9 +39,11 @@ module.exports = function( options, callback )
     var replaceImport = function( callback )
     {
         var args = this;
+        var re = new RegExp( inline.escapeSpecialChars( args.marker ), "g" );
 
         if( inline.isBase64Path( args.src ) )
         {
+            result = result.replace( re, () => args.rule );
             return callback( null ); // Skip
         }
 
@@ -49,6 +51,7 @@ module.exports = function( options, callback )
         {
             if( err )
             {
+                result = result.replace( re, () => args.rule );
                 return inline.handleReplaceErr( err, args.src, settings.strict, callback );
             }
 
@@ -73,7 +76,6 @@ module.exports = function( options, callback )
                 {
                     css = "@layer " + ( typeof( rule.layer ) === "string" ? rule.layer : "" ) + " {\n" + css + "}\n";
                 }
-                var re = new RegExp( inline.escapeSpecialChars( args.marker ), "g" );
                 result = result.replace( re, () => css );
 
                 return callback( null );
