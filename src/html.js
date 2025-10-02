@@ -168,7 +168,7 @@ module.exports = function( options, callback )
                 return callback( null );
             },{ normalizeWhitespace: true } );
             var parser = new htmlparser.Parser( handler, { xmlMode: true } );
-            parser.write( content );
+            parser.write( content.toString() );
             parser.done();
         } );
     };
