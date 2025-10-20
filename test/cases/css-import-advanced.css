@@ -1,0 +1,15 @@
+/* media queries */
+@import url("css.css") print and (max-width: 800px);
+/* layers */
+@import url("css.css") layer;
+@import url("css.css") layer(utilities);
+/* feature detection */
+@import url("css.css") supports(display: grid);
+@import url("css.css") supports((not (display: grid)) and (display: flex));
+/* all together */
+@import url("css.css")
+    layer(base)
+    supports(display: grid)
+    screen and (max-width: 800px);
+
+/* more styles */
