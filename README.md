@@ -1,16 +1,16 @@
-# web-resource-inliner [![build status](https://api.travis-ci.org/jrit/web-resource-inliner.svg)](http://travis-ci.org/jrit/web-resource-inliner)
+# web-resource-inliner [![Build][github-ci-shield]][github-ci]
 
 Brings externally referenced resources, such as js, css and images, into a single file.
 
 For example:
 
 ```html
-<link href="css/style.css" rel="stylesheet" data-inline >
+<link href="css/style.css" rel="stylesheet" data-inline>
 ```
 is replaced with
 ```html
 <style>
-/* contents of css/style.css */
+    /* contents of css/style.css */
 </style>
 ```
 
@@ -20,7 +20,8 @@ By default, all links and scripts are inlined, plus any images under 8KB, howeve
 
 
 ## Getting Started
-```
+
+```sh
 npm install web-resource-inliner
 ```
 
@@ -78,3 +79,7 @@ Allows to make changes to links before they are inlined, such as CSS pre-and-pos
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Run tests with `npm test`.
+
+
+[github-ci]: https://github.com/maizzle/framework/actions
+[github-ci-shield]: https://github.com/maizzle/framework/actions/workflows/nodejs.yml/badge.svg
