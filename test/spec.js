@@ -189,6 +189,25 @@ describe( "html", function()
 
     } );
 
+    describe( "css imports", function()
+    {
+        it( "should inline @import rules inside stylesheets", function( done )
+        {
+            var expected = readFile( "test/cases/css-import_out.html" );
+
+            inline.html( {
+                    fileContent: readFile( "test/cases/css-import.html" ),
+                    relativeTo: "test/cases/",
+                    imports: true
+                },
+                function( err, result )
+                {
+                    testEquality( err, result, expected, done );
+                }
+            );
+        } );
+    } );
+
     describe( "scripts", function()
     {
         it( "should inline scripts", function( done )
@@ -665,6 +684,72 @@ describe( "css", function()
         );
     } );
 
+    it( "should inline @import rule (basic)", function( done )
+    {
+        var expected = readFile( "test/cases/css-import_out.css" );
+
+        inline.css( {
+                fileContent: readFile( "test/cases/css-import.css" ),
+                relativeTo: "test/cases/",
+                imports: true
+            },
+            function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            }
+        );
+    } );
+
+    it( "should inline @import rule included via comment", function( done )
+    {
+        var expected = readFile( "test/cases/css-import_out.css" );
+
+        inline.css( {
+                fileContent: readFile( "test/cases/css-import.css" )
+                    .replace(/@import.+$/im, '$& /* data-inline */'),
+                relativeTo: "test/cases/",
+                imports: false
+            },
+            function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            }
+        );
+    } );
+
+    it( "should not inline @import rule excluded via comment", function( done )
+    {
+        var expected = readFile( "test/cases/css-import.css" )
+            .replace(/@import.+$/im, '$& /* data-inline-ignore */');
+
+        inline.css( {
+                fileContent: expected,
+                relativeTo: "test/cases/",
+                imports: true
+            },
+            function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            }
+        );
+    } );
+
+    it( "should inline @import rule (advanced)", function( done )
+    {
+        var expected = readFile( "test/cases/css-import-advanced_out.css" );
+
+        inline.css( {
+                fileContent: readFile( "test/cases/css-import-advanced.css" ),
+                relativeTo: "test/cases/",
+                imports: true
+            },
+            function( err, result )
+            {
+                testEquality( err, result, expected, done );
+            }
+        );
+    } );
+
     it( "should rebase local urls", function( done )
     {
         var expected = readFile( "test/cases/css-rebase_out.css" );
@@ -699,6 +784,124 @@ describe( "util", function()
             assert.equal( result, expected );
             assert.equal( str.match( regex ).length, 1 );
 
+        } );
+    } );
+
+    describe( "#parseCSSImportRule", function()
+    {
+        it( "should parse basic @import rule", function()
+        {
+            var testCases = [
+                [ '@import "styles.css";', "styles.css" ],
+                [ '@import "styles\\".css";', 'styles\\".css' ],
+                [ "@import 'styles.css';", "styles.css" ],
+                [ '@import url( "styles.css?query=param&a=b&foo[]=bar" ) ;', "styles.css?query=param&a=b&foo[]=bar" ],
+                [ '\n@import\nurl(\n"styles.css"\n)\n;\n', "styles.css" ]
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase[ 0 ] ), {
+                    url: testCase[ 1 ],
+                    layer: null,
+                    supports: null,
+                    media: null
+                }, "Test case #" + idx + " failed." );
+            } );
+        } );
+
+        it( "should parse @import rule with media queries", function()
+        {
+            var testCases = [
+                '@import "styles.css" screen and (orientation: landscape);',
+                '@import url( "styles.css" ) screen and (orientation: landscape);'
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase ), {
+                    url: "styles.css",
+                    layer: null,
+                    supports: null,
+                    media: "screen and (orientation: landscape)"
+                }, "Test case #" + idx + " failed." );
+            } );
+        } );
+
+        it( "should parse @import rule with a cascade layer", function()
+        {
+            var testCases = [
+                [ '@import "styles.css" layer(utilities);', "utilities" ],
+                [ '@import url("styles.css") layer;', true ],
+                [ '@import url( "styles.css" ) layer();', true ]
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase[ 0 ] ), {
+                    url: "styles.css",
+                    layer: testCase[ 1 ],
+                    supports: null,
+                    media: null
+                }, "Test case #" + idx + " failed." );
+            } );
+        } );
+
+        it( "should parse @import rule with a cascade layer and media queries", function()
+        {
+            var testCases = [
+                [ '@import "styles.css" layer(utilities) screen and (orientation: landscape) ;', "utilities" ],
+                [ '@import url("styles.css") layer screen and (orientation: landscape);', true ],
+                [ '@import url( "styles.css" ) layer() screen and (orientation: landscape) ;', true ]
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase[ 0 ] ), {
+                    url: "styles.css",
+                    layer: testCase[ 1 ],
+                    supports: null,
+                    media: "screen and (orientation: landscape)"
+                }, "Test case #" + idx + " failed." );
+            } );
+        } );
+
+        it( "should parse @import rule with feature conditional", function()
+        {
+            var testCases = [
+                [ '@import "styles.css" supports(display: grid);', "display: grid" ],
+                [ '@import url("styles.css") supports( (not (display: grid))\n and\n (display: flex) ) ;', "(not (display: grid))\n and\n (display: flex)" ],
+                [ '@import url( "styles.css" )\nsupports((selector(h2 > p)) and (font-tech(color-COLRv1)));', "(selector(h2 > p)) and (font-tech(color-COLRv1))" ]
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase[ 0 ] ), {
+                    url: "styles.css",
+                    layer: null,
+                    supports: testCase[ 1 ],
+                    media: null
+                }, "Test case #" + idx + " failed." );
+            } );
+        } );
+
+        it( "should parse @import rule with all options used", function()
+        {
+            var testCases = [
+                [ '@import "styles.css" layer supports(display: grid);', true, "display: grid", null ],
+                [ '@import url("styles.css") layer(utilities) supports( (not (display: grid))\n and\n (display: flex) ) ;', "utilities", "(not (display: grid))\n and\n (display: flex)", null ],
+                [ '@import url( "styles.css" )\nlayer()\nsupports((selector(h2 > p)) and (font-tech(color-COLRv1)))\nscreen, print and (max-width: 800px);', true, "(selector(h2 > p)) and (font-tech(color-COLRv1))", "screen, print and (max-width: 800px)" ]
+            ];
+
+            testCases.forEach( function( testCase, idx )
+            {
+                assert.deepStrictEqual( util.parseCSSImportRule( testCase[ 0 ] ), {
+                    url: "styles.css",
+                    layer: testCase[ 1 ],
+                    supports: testCase[ 2 ],
+                    media: testCase[ 3 ]
+                }, "Test case #" + idx + " failed." );
+            } );
         } );
     } );
 
